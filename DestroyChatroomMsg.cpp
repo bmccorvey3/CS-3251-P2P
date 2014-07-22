@@ -1,0 +1,73 @@
+//
+//  DestroyChatroomMsg.cpp
+//  MessageHierarchyP2P
+//
+//  Created by Brent on 7/19/14.
+//  Copyright (c) 2014 Brent. All rights reserved.
+//
+
+#include "DestroyChatroomMsg.h"
+
+DestroyChatroomMsg::DestroyChatroomMsg(unsigned int length, char* username,
+                                       unsigned int salt, char* type,
+                                       void* payload) : BaseMessage(length,
+                                                username,salt,type,payload) {}
+
+DestroyChatroomMsg::~DestroyChatroomMsg() {}
+
+unsigned int DestroyChatroomMsg::getLength() {
+    return BaseMessage::l;
+}
+
+char* DestroyChatroomMsg::getUsername() {
+    return BaseMessage::user;
+}
+
+unsigned int DestroyChatroomMsg::getSalt() {
+    return BaseMessage::salt;
+}
+
+char* DestroyChatroomMsg::getType() {
+    return BaseMessage::type;
+}
+
+void* DestroyChatroomMsg::getPayload() {
+    return BaseMessage::payload;
+}
+
+Direction DestroyChatroomMsg::getDirection() {
+    Direction dir = Direction::NONE;
+    char peerServer[] = "dsps";
+    char serverPeer[] = "dssp";
+    char serverPeer2[] = "dnsp";
+    for(int i = 0; i<(sizeof(BaseMessage::type)/BaseMessage::type[0]); ++i) {
+        if(peerServer[i] == *(BaseMessage::type + i)) {
+            dir = Direction::P2S;
+        }
+        else if(serverPeer[i] == *(BaseMessage::type + i) ||
+                serverPeer2[i] == *(BaseMessage::type + i)) {
+            dir = Direction::S2P;
+        }
+    }
+    return dir;
+}
+
+std::string DestroyChatroomMsg::getStringFromPayload(void* payload) {
+    std::string *payload_pointer = static_cast<std::string*>(payload);
+    std::string s = *payload_pointer;
+    return s;
+}
+
+std::string DestroyChatroomMsg::getDestroyedChatRoomP2S() {
+    std::string chatRoom = getStringFromPayload(BaseMessage::payload);
+    unsigned long last = chatRoom.find_last_of("chatroom ");
+    unsigned long first = chatRoom.find_first_of(".");
+    return chatRoom.substr(last+1,first-last-1);
+}
+
+std::string DestroyChatroomMsg::getDestroyedChatRoomS2P() {
+    std::string chatRoom = getStringFromPayload(BaseMessage::payload);
+    unsigned long last = chatRoom.find_last_of("Chatroom ");
+    unsigned long first = chatRoom.find_first_of(" destroyed");
+    return chatRoom.substr(last+1,first-last-1);
+}
