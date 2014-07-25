@@ -12,7 +12,7 @@ class Peers
         /*
         * IPaddr + port, etc.
         */
-        typedef struct sockaddr_in IPaddr_struct;
+        typedef struct sockaddr_in IPaddrStruct;
         //    struct sockaddr_in {
         //        short            sin_family;   // e.g. AF_INET, AF_INET6
         //        unsigned short   sin_port;     // e.g. htons(3490)
@@ -35,10 +35,12 @@ class Peers
             IPaddr_struct ip;
             std::string username;
 
-            /// Full disclosure: I'm not checking username for equality
+            /// Full disclosure: I'm not checking username for equality;
+            /// only IP address and port number
             bool operator==(const Peer& p) const
             {
-                return ip == p.ip;
+                return (ip.sin_addr.in_addr == p.ip.sin_addr.in_addr)
+                    &&  (ip.sin_port == p.ip.sin_port);
             }
         } Peer;
 
