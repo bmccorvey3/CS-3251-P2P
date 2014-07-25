@@ -6,7 +6,7 @@
 class Chatroom
 {
     public:
-        Chatroom();
+        Chatroom(std::string name);
         virtual ~Chatroom();
         std::string toString();
         Peers peers,
@@ -22,10 +22,10 @@ class Chatroom
         * Remove a particular peer from the list
         * TODO updatePeers()?
         */
-        removePeer(stIPaddr& stIPaddr);
+        Peer* removePeer(stIPaddr& stIPaddr);
     protected:
     private:
-        Peer m_recentlyChangedPeer;
+        std::list<Peer> m_peers;
 };
 
 #endif // CHATROOM_H

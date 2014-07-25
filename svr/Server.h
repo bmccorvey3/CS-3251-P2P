@@ -62,11 +62,11 @@ class Server
         /**
         * Doubly linked list of chatrooms
         */
-        list* m_chatrooms;
+        std::list<Chatroom> m_chatrooms;
         /**
         * Circular, doubly linked list of peers
         */
-        Peers m_floatingPeers;
+        std::list<Peer> m_floatingPeers;
 
         /// The port on which we're listening for incoming connections
         const unsigned short m_listeningPort;
@@ -106,6 +106,7 @@ class Server
         */
         void leaveChatroom(LeaveChatroomMsg::LeaveChatroomMsg& msg);
 
+        Chatrooom::Chatroom* getChatroom(const std::string& chatroomName)
 };
 
 #endif // SERVER_H
