@@ -1,114 +1,97 @@
+//  Created by Andrew Scheinbach on 7/20/14.
+//  Copyright (c) 2014 Andrew Scheinbach. All rights reserved.
+
 #ifndef PEER_H
 #define PEER_H
 
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/stat.h>
+#include <netinet/in.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <limits.h>
+#include <errno.h>
+#include <string>
+#include <sstream>
+#include <iterator>
+#include <iostream>
+
+#include "sha256.h"
+
+#define BUFSIZE 2048
+#define serverPort 11111
+#define primaryPort 22222
+#define secondaryPort 33333
+
+
+
 class Peer
 {
-	public:
-		Peer();
-		~Peer();
+    public:
+        Peer(std::string server);
+        ~Peer();
 
-		 typedef struct sockaddr_in IPaddr_struct;
-            struct sockaddr_in {
+         typedef struct sockaddr_in IPaddr_struct;
+            /*struct sockaddr_in {
                 short            sin_family;   // e.g. AF_INET, AF_INET6
                 unsigned short   sin_port;     // e.g. htons(3490)
                 struct in_addr   sin_addr;     // see struct in_addr, below
                 char             sin_zero[8];  // zero this if you want to
-            };
+            };*/
 
         /*
         * The actual IP address
         */
         typedef struct in_addr IPaddr;
-            struct in_addr {
+            /*struct in_addr {
                 unsigned long s_addr; // load with inet_pton()
-            };
+            };*/
 
-		/****
-		*Functions
-		****/
+        /****
+        *Functions
+        ****/
 
-	protected:
-	private:
-		/*
-		*Queue of messages sent/recieved that are hashed
-		*/
-		queue m_messageHashes;
-		/*
-		*Queue that stores any messages unable to be sent to the 2 recipients
-		*/
-		queue m_messageList;
-
-		char *string username;
-		char *string portNumber;
-		char *string ServerName;
-
-		IPAddr primaryRecipient;
-		IPAddr secondaryRecipient;
-
-		static p_thread_mutex_t sendRecieveMutex;
-
-		/*
-		*Creation of Peer, taking in server 
-		*/
-		int main(int argc, char **argv);
-
-
-		/*
-        * Sends message to server
+    protected:
+    private:
+        /*
+        *Vector of messages sent/recieved that are hashed
         */
-        void send();
+        
+        std::vector<std::string> m_messageHashes;
+        /*
+        *Queue that stores any messages unable to be sent to the 2 recipients
+        */
+        std::queue<std::string> m_messageList;
 
         /*
-        * Receive message from server, print to stdout
+        *Username used to define peer in chatroom
         */
-        void receive();
+        std::string username;
 
         /*
-        * changes the first and second recipients based on the server structure
-        * in the current chatroom
+        *Server that the peers are connecting to,
+        *sending commands to and receiving updates from
         */
-        void updateRecipients(char *payload);
+        std::string serverName;
+
+        /*
+        *The two recipients each peer sends text messages to
+        */
+        IPAddr primaryRecipient;
+        IPAddr secondaryRecipient;
 
         /*
         *Using the SHA256 Hash, any message recieved/sent will be hashed.
         */
-        String hashMessage(char *message);
+        std::string hashMessage(char *message);
 
         /*
-        *Updates the peer's username and sends it to the server
+        *Forces lowercase on Strings
         */
-        void createUsername(char *payload);
-
-        /*
-        *Lets the server know the peer is leaving the chatroom
-        */
-        void leaveChatroom();
-
-        /*
-        *Enters selected Chatroom
-        */
-        void enterChatroom(char *payload);
-
-        /*
-        *Ask to join current chatroom if it isn't at max capacity
-        */
-        void joinChatroom(char *payload);
-
-        /*
-        *Requests to destroy current chatroom in the server
-        */
-        void destroyChatroom(char *payload);
-
-        /*
-        * Tells server the peer is going offline
-        */
-        void goOffline();
-
-        /*
-        *Requests that a chatroom be created by the server
-        */
-        void createChatroom();
-
+        std::string toLowerCase();
         /*
         *Notifies the server if one of the two recipients of the peer went offline
         *and timed out the ACK response
@@ -116,17 +99,29 @@ class Peer
         void notifyRecipientDied();
 
         /*
-        *Sets up TCP Socket
+        *Sends a prompt of instructions to stdout
         */
+        void Peer::printPrompt();
+        
+        /*
+        *Receive messages from previous peers
+        */
+        void receieveFromPeer(int portno);
 
-        //Send Peer to Server commands
-        void setupSendToServerSocket();
-        //Sends messages forward to next peers
-        void setupSendToPeersServer();
-        //Receive messages from previous peers
-        void setupReceiveFromPeersSocket();
-        //Receive updates from Server
-        void setupReceiveFromServerSocket();
+        /*
+        *Receive updates from Server
+        */
+        void receiveFromServer();
+
+        /*
+        *Send messages to Peer; Linearly:PrimaryRecipient, SecondaryRecipient
+        */
+        void sendToPeer();
+
+        /*
+        *Send UI commands to server
+        */
+        void sendToServer();
 
 
 }
