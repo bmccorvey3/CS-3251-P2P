@@ -3,15 +3,14 @@
 
 #include "peer.h"
 
-Peer::Peer()
+Peer::Peer(std::string server)
 {
 	void buffer[BUFSIZE];
 	void response[BUFSIZE];
-	char *server; //Use std::string serverName(server) to get std::string of server
-	std::string serverName;
+	std::string serverName = server;
 
-	Queue<std::string> m_messageList;
-	Vector<std::string> m_messageHashes;
+	std::queue<std::string> m_messageList;
+	std::vector<std::string> m_messageHashes;
 
 	std::string username;
 
@@ -35,19 +34,7 @@ Peer::~Peer()
 	delete IPAddr primaryRecipient;
 	delete IPAddr secondaryRecipient;
 
-	static p_thread_mutex_t sendRecieveMutex;
 }
-
-/*int main(int argc, char **argv){
-	if (argc < 2)
-  {
-    fprintf(stderr,
-            "Usage: peer SERVER ""\n");
-    exit(1);
-  }
-  	server = argv[1];
-  	serverName(server);
-}*/
 
 
 void Peer::receiveFromPeer(int portno){
@@ -135,14 +122,14 @@ void Peer::receiveFromServer(){
 	close(svr_sock);
 }
 
-void Peer::sendtoPeer(int portno, IPAddr recipient){
+void Peer::sendtoPeer(){
 	using namespace std;
-	//Create Socket on port portno to send to recipient IPAddr
+	//Create Socket on port portno 22222 to send to PRimaryRecipient IPAddr
 	int sock = socket(AF_INET, SOCK_STREAM, 0);
   	struct sockaddr_in addr;
   	addr.sin_family = AF_INET;
-  	addr.sin_port = htons(portno);
-  	addr.sin_addr = recipient;
+  	addr.sin_port = htons(primaryPort);
+  	addr.sin_addr = PrimaryRecipient;
   	//inet_aton(recipient, &addr.sin_addr.s_addr);
   	connect(sock, (struct sockaddr_in*)&addr,sizeof(addr));
   	memset(buffer, '\0', sizeof(buffer));
@@ -158,7 +145,34 @@ void Peer::sendtoPeer(int portno, IPAddr recipient){
   	}
   	close(sock);
   	if(timeout){
-  		NotifyRecipientDied(recipient);
+  		NotifyRecipientDied(PrimaryRecipient);
+  	}
+
+  	/********************************************************
+  	*SecondaryRecipient
+  	********************************************************/
+  	//Create Socket on port portno 33333 to send to SecondaryRecipient IPAddr
+	int sock = socket(AF_INET, SOCK_STREAM, 0);
+  	struct sockaddr_in addr;
+  	addr.sin_family = AF_INET;
+  	addr.sin_port = htons(secondaryPort);
+  	addr.sin_addr = SecondaryRecipient;
+  	//inet_aton(recipient, &addr.sin_addr.s_addr);
+  	connect(sock, (struct sockaddr_in*)&addr,sizeof(addr));
+  	memset(buffer, '\0', sizeof(buffer));
+  	memset(response, '\0', sizeof(response));
+
+  	bool timeout = true;
+  	//Send all messages in message Queue
+  	while(m_messageList.size > 0){
+  		buffer = m_messageList.pop();
+  		while(sendto(sock,buffer, BUFSIZE, 0, (struct sockaddr_in*)&addr, sizeof(addr))){
+  			timeout = false;
+  		}
+  	}
+  	close(sock);
+  	if(timeout){
+  		NotifyRecipientDied(SecondaryRecipient);
   	}
 }
 
@@ -240,6 +254,7 @@ void Peer::sendtoServer(){
 	  	while(numBytesReceived += recvfrom(sock, response+numBytesReceived, BUFSIZE, 0, (struct sockaddr_in*)&svr_addr, &svr_len)>0){};
   	 
   	 	cout <<(ChooseUsernameMsg)response.getUsernameS2P();
+  	 	username = response.getUsernameS2P();
 	}	
 	else if(strncmp(code, "h")){
 		printPrompt();

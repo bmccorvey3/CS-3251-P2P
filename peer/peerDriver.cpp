@@ -25,6 +25,7 @@ int main(int argc, char **argv){
   	Peer peerNode = new Peer(server);
 
   	p_thread_mutex_init(&sendReceiveMutex, NULL);
+  	peerNode.printPrompt();
   	while(1){
   		//Receive Updates/Drops from Server
 	  	p_thread_mutex_lock(&sendReceiveMutex);

@@ -25,8 +25,19 @@ void setupSocket();
 
 int main(int argc, char **argv)
 {
-  parse_args(argc, argv);
+  if (argc < 2)
+  {
+    fprintf(stderr,
+            "Usage: tcp_client SERVER ""\n");
+    exit(1);
+  }
+  g_szServer = argv[1];
+
+  g_usPort = 11111;
   setupSocket();
+  while(1){
+
+  }
   //sendto(sock, g_szMessage, strlen(g_szMessage), 0, (struct sockaddr_in*)&addr, sizeof(addr)); 
   close(sock);
 
@@ -45,38 +56,4 @@ void setupSocket(){
 void goOffline(){
   g_szMessage = "lvps";
   sendto(sock, )
-}
-
-
-void parse_args(int argc, char **argv)
-{
-  if (argc < 4)
-  {
-    fprintf(stderr,
-            "Usage: tcp_client SERVER PORT \"MESSAGE\"\n");
-    exit(1);
-  }
-
-  errno = 0;
-  char *endptr = NULL;
-  unsigned long ulPort = strtoul(argv[2], &endptr, 10);
-
-  if (0 == errno)
-  {
-    // If no other error, check for invalid input and range
-    if ('\0' != endptr[0])
-      errno = EINVAL;
-    else if (ulPort > USHRT_MAX)
-      errno = ERANGE;
-  }
-  if (0 != errno)
-  {
-    // Report any errors and abort
-    fprintf(stderr, "Failed to parse port number \"%s\": %s\n",
-            argv[2], strerror(errno));
-    abort();
-  }
-  g_usPort = ulPort;
-
-  g_szServer = argv[1];
 }
