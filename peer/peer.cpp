@@ -20,8 +20,6 @@ Peer::Peer(std::string server)
 
 Peer::~Peer()
 {
-	delete void buffer[BUFSIZE];
-	delete void response[BUFSIZE];
 	delete char *server; //Use std::string serverName(server) to get std::string of server
 
 	delete Queue<std::TextMsg> m_messageList;
