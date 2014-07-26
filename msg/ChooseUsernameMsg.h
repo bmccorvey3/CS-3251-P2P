@@ -13,15 +13,15 @@
 #include "BaseMessage.h"
 
 class ChooseUsernameMsg : public BaseMessage {
-public :
-    
+public:
     ChooseUsernameMsg(string username, Direction dir, string payload);
     ChooseUsernameMsg(void* input);
     ~ChooseUsernameMsg(); //TODO delete pointers
     
     void* getMessageStruct();
 
-    string getChoosePayload();
+    string getPayloadString();
+    string getChooseString();
     string getPrefixP2S();
     string getPrefixS2P();
     
@@ -29,7 +29,16 @@ private:
     string m_choosePayload;
     const static string m_prefixP2S;
     const static string m_prefixS2P;
- 
+    static const size_t p2sTotalPayloadSize = sizeof(m_choosePayload)+ sizeof(m_prefixP2S);
+    static const size_t s2pTotalPayloadSize = sizeof(m_choosePayload) + sizeof(m_prefixS2P);
+    typedef struct __attribute__((packed)) FULL_MESSAGE_P2S {
+        StBaseHeader stBaseHeader;
+        char payload[p2sTotalPayloadSize];
+    } FullMessageP2S;
+    typedef struct __attribute__((packed)) FULL_MESSAGE_S2P {
+        StBaseHeader stBaseHeader;
+        char payload[s2pTotalPayloadSize];
+    } FullMessageS2P;
 };
 
 

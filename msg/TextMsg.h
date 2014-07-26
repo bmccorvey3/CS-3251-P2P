@@ -21,7 +21,7 @@ public :
     void* getMessageStruct();
     
     std::string getTextPayload();
-    std::string getPrefixStr();
+    string getPayloadString();
     
 private:
     std::string m_textPayload;

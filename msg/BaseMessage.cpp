@@ -33,6 +33,7 @@ BaseMessage::BaseMessage(void* msg)
     m_code = stMsg->code;
     memcpy(&m_code, stMsg->code, CODE_LENGTH);
     memcpy(&m_chatRoomName, stMsg->chatRoomName, CHATROOM_NAME_LENGTH);
+    m_payload = (void*)&(((char*)msg)[HEADER_LENGTH]);
 }
 
 // TODO check scope on this
@@ -147,13 +148,14 @@ BaseMessage* BaseMessage::getInstance(void* input){
         case NOTIFY_P2S:
         case NOTIFY_S2P:
         case ERR_NOTIFY_S2P:
-            return new NotifyDroppedPeerMsg(input);
+     //       return new NotifyDroppedPeerMsg(input);
         case UPDATE_P2S:
         case UPDATE_S2P:
-            return new UpdateRecipientsMsg(input);
+     //       return new UpdateRecipientsMsg(input);
         // TODO add other cases
         default:
             fprintf(stderr, "Error creating new message!\n");
+            return nullptr;
             break;
     }
 }
@@ -190,18 +192,18 @@ BaseMessage* BaseMessage::getInstance(void* input){
 //    
 //}
 
-//static string log(BaseMessage& msg) {
-//    std::stringstream ss;
-//    ss << "The length is: " << msg.getLength() << std::endl;
-//    ss << "The username is: " << msg.getUsername() << std::endl;
-//    ss << "The salt is: " << msg.getSalt() << std::endl;
-//    ss << "The message type is: " << msg.getMessageType() << std::endl;
-//    ss << "The string type is: " << msg.getStringType() << std::endl;
-//    ss << "The direction is: " << static_cast<int>(msg.getDirection()) << std::endl;
-//    ss << "The chatroom name is: " << msg.getChatroom() << std::endl;
-//    ss << "The payload is: " << msg.getPayloadString() << std::endl;
-//    return ss.str();
-//}
+static string log(BaseMessage* msg) {
+    std::stringstream ss;
+    ss << "The length is: " << msg->getLength() << std::endl;
+    ss << "The username is: " << msg->getUsername() << std::endl;
+   // ss << "The salt is: " << msg->getSalt() << std::endl;
+ //   ss << "The message type is: " << msg->getMessageType() << std::endl;
+    ss << "The string type is: " << msg->getMessageCode() << std::endl;
+    ss << "The direction is: " << static_cast<int>(msg->getDirection()) << std::endl;
+    ss << "The chatroom name is: " << msg->getChatRoomName() << std::endl;
+    ss << "The payload is: " << msg->getPayloadPtr() << std::endl;
+    return ss.str();
+}
 
 StBaseHeader* BaseMessage::getHeaderStruct(){
     StBaseHeader* retStruct = (StBaseHeader*) malloc(sizeof(HEADER_LENGTH));
@@ -213,6 +215,7 @@ StBaseHeader* BaseMessage::getHeaderStruct(){
     // TODO set code in children classes
     const char* tempChatRoomName = m_chatRoomName.c_str();
     memcpy(&(retStruct->chatRoomName), &tempChatRoomName, m_chatRoomName.size());
+    return retStruct;
 }
 
 //
