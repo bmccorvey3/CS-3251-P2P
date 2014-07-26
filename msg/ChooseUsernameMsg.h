@@ -13,19 +13,23 @@
 #include "BaseMessage.h"
 
 class ChooseUsernameMsg : public BaseMessage {
-    public :
-    ChooseUsernameMsg(unsigned int length, char* username, unsigned int salt,
-            char* type, void* payload);
-    ~ChooseUsernameMsg();
-    unsigned int getLength();
-    char* getUsername();
-    unsigned int getSalt();
-    char* getType();
-    void* getPayload();
-    Direction getDirection();
-    std::string getStringFromPayload(void*);
-    std::string getUsernameP2S();
-    std::string getUsernameS2P();
+public :
+    
+    ChooseUsernameMsg(string username, Direction dir, string payload);
+    ChooseUsernameMsg(void* input);
+    ~ChooseUsernameMsg(); //TODO delete pointers
+    
+    void* getMessageStruct();
+
+    string getChoosePayload();
+    string getPrefixP2S();
+    string getPrefixS2P();
+    
+private:
+    string m_choosePayload;
+    const static string m_prefixP2S;
+    const static string m_prefixS2P;
+ 
 };
 
 

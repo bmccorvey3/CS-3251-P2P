@@ -35,7 +35,7 @@ void* LeaveChatroomMsg::getPayload() {
 }
 
 Direction LeaveChatroomMsg::getDirection() {
-    Direction dir = Direction::NONE;
+    Direction dir = Direction::ERROR;
     char peerServer[] = "lvps";
     char serverPeer[] = "lvsp";
     for(int i = 0; i<(sizeof(BaseMessage::type)/BaseMessage::type[0]); ++i) {

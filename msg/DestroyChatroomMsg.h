@@ -12,20 +12,23 @@
 #include <iostream>
 #include "BaseMessage.h"
 
-class DestroyChatroomMsg : public BaseMessage {
-    public :
-    DestroyChatroomMsg(unsigned int length, char* username, unsigned int salt,
-            char* type, void* payload);
-    ~DestroyChatroomMsg();
-    unsigned int getLength();
-    char* getUsername();
-    unsigned int getSalt();
-    char* getType();
-    void* getPayload();
-    Direction getDirection();
-    std::string getStringFromPayload(void*);
-    std::string getDestroyedChatRoomP2S();
-    std::string getDestroyedChatRoomS2P();
+class DestroyChatroomMsg: public BaseMessage {
+public :
+    DestroyChatroomMsg(string username, Direction dir, string chatRoomName, string payload);
+    DestroyChatroomMsg(void* input);
+    ~DestroyChatroomMsg(); //TODO delete pointers
+    
+    void* getMessageStruct();
+    
+    string getDestroyPayload();
+    
+private:
+    string m_destroyPayload;
+    const static string m_prefixP2S;
+    const static string m_prefixS2P;
+    const static string m_S2P_ERR;
+    const static string m_postfixP2S;
+    const static string m_postFixS2P;
 };
 
 

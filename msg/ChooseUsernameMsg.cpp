@@ -7,63 +7,50 @@
 //
 
 #include "ChooseUsernameMsg.h"
+#define POS_CHOOSE_PREFIX 0
+const string ChooseUsernameMsg::m_prefixP2S = "My username:";
+const string ChooseUsernameMsg::m_prefixS2P = "Hello, ";
 
-ChooseUsernameMsg::ChooseUsernameMsg(unsigned int length, char* username,
-                                     unsigned int salt, char* type,
-                                     void* payload) : BaseMessage(length,
-                                                username,salt,type,payload) {}
+ChooseUsernameMsg::ChooseUsernameMsg(string username, Direction dir , string payload)
+                    : BaseMessage(username, dir, NULL)
+{
+    m_choosePayload = payload;
+    if(dir == Direction::P2S) {
+        m_messageType = MessageType::CHOOSE_P2S;
+        m_length = HEADER_LENGTH + sizeof(m_choosePayload) + sizeof(m_prefixP2S);
+        m_code = "cups";
+    }
+    else if (dir == Direction::S2P) {
+        m_messageType = MessageType::CHOOSE_S2P;
+        m_length = HEADER_LENGTH + sizeof(m_choosePayload) + sizeof(m_prefixS2P);
+        m_code = "cusp";
+    }
+    else {
+        fprintf(stderr, "Incorrect direction in ChooseUsername!\n");
+    }
+}
 
 ChooseUsernameMsg::~ChooseUsernameMsg() {}
 
-unsigned int ChooseUsernameMsg::getLength() {
-    return BaseMessage::l;
-}
-
-char* ChooseUsernameMsg::getUsername() {
-    return BaseMessage::user;
-}
-
-unsigned int ChooseUsernameMsg::getSalt() {
-    return BaseMessage::salt;
-}
-
-char* ChooseUsernameMsg::getType() {
-    return BaseMessage::type;
-}
-
-void* ChooseUsernameMsg::getPayload() {
-    return BaseMessage::payload;
-}
-
-Direction ChooseUsernameMsg::getDirection() {
-    Direction dir = Direction::NONE;
-    char peerServer[] = "cups";
-    char serverPeer[] = "cusp";
-    for(int i = 0; i<(sizeof(BaseMessage::type)/BaseMessage::type[0]); ++i) {
-        if(peerServer[i] == *(BaseMessage::type + i)) {
-            dir = Direction::P2S;
-        }
-        else if(serverPeer[i] == *(BaseMessage::type + i)) {
-            dir = Direction::S2P;
-        }
+ChooseUsernameMsg::ChooseUsernameMsg(void* input) : BaseMessage(input) {
+    char* choosePayload = (char*) malloc(m_length);
+    memcpy(choosePayload, &((char*)input)[HEADER_LENGTH], m_length);
+    std::string tempchoosePayload(choosePayload);
+    if(tempTextPayload.find(m_prefixP2S) == POS_CHOOSE_PREFIX){
+        m_choosePayload = string(choosePayload);
+        // cut down on string to what we actuall want
+        m_choosePayload = m_choosePayload.substr(POS_CHOOSE_PREFIX+m_prefixP2S.size());
+        // TODO deallocate m_textPayload in destructor
     }
-    return dir;
+    else if (tempchoosePayload.find(m_prefixS2P) == POS_CHOOSE_PREFIX) {
+        m_choosePayload = string(choosePayload);
+        m_choosePayload = m_choosePayload.substr(POS_CHOOSE_PREFIX+m_prefixS2P.size());
+    }
+    else {
+        fprintf(stderr, "Couldn't find 'txt:' in text payload\n");
+        // TODO add log information
+    }
+    // free choosePayload; // TODO do I need this?
 }
 
-std::string ChooseUsernameMsg::getStringFromPayload(void* payload) {
-    std::string *payload_pointer = static_cast<std::string*>(payload);
-    std::string s = *payload_pointer;
-    return s;
-}
-
-std::string ChooseUsernameMsg::getUsernameP2S() {
-    std::string username = getStringFromPayload(BaseMessage::payload);
-    unsigned long last = username.find_last_of("My username: ");
-    return username.substr(last+1);
-}
-
-std::string ChooseUsernameMsg::getUsernameS2P() {
-    std::string username = getStringFromPayload(BaseMessage::payload);
-    unsigned long last = username.find_last_of("Hello, ");
-    return username.substr(last+1);
 }
