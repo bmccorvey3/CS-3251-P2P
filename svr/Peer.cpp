@@ -13,6 +13,21 @@ Peer::~Peer()
     delete(m_username);
 }
 
+std::string Peer::getUsername()
+{
+    return m_username;
+}
+
+IPaddrStrut Peer::getIPaddr()
+{
+    return m_IPaddr;
+}
+
+void Peer::setUsername(std::string username)
+{
+    m_username = username;
+}
+
 //void Peer::addPeer(Peer &peer)
 //{
 //

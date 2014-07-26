@@ -1,6 +1,7 @@
 #ifndef PEERS_H
 #define PEERS_H
 
+#define DEBUG_SERVER
 
 class Peer
 {
@@ -89,6 +90,11 @@ class Peer
 //        * Create and add a peer to the list of peers (in the back of the list)
 //        */
 //        void addPeer(IPaddr_struct &stIPaddr, std::string username);
+        std::string getUsername();
+
+        IPaddrStrut getIPaddr();
+
+        void setUsername(std::string username);
 
     private:
 

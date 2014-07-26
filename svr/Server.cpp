@@ -10,6 +10,11 @@ Server::~Server()
 {
 }
 
+int main(int argc, char argv[]){
+    Server server = new Server();
+    server.monitor();
+}
+
 void Server::monitor()
 {
     printf("Starting server\n");
@@ -56,7 +61,7 @@ void Server::monitor()
 #endif
             }
             // receive data from the client
-            numBytesRecv += recv(cli_sock, buffer, sizeof(buffer), 0);
+            numBytesRecv += recv(cli_sock, buffer[numBytesRecv], sizeof(buffer), 0); // added +numBytesReceived
 #ifdef DEBUG_SERVER
             printf("Now server has received %d bytes\n", numBytesRecv);
 #endif
@@ -66,7 +71,6 @@ void Server::monitor()
 #ifdef DEBUG_SERVER
                 printf("\"%s\"\n", buffer);
 #endif
-
                 // TODO find whether we've received the whole packet or whether we should wait for more
                 if (receivedFullPacket) // TODO set this variable
                 {
@@ -111,6 +115,9 @@ void Server::respondToRequest(BaseMessage msg, int cli_sock)
         case LEAVE_CHATROOM:
             leaveChatroom((LeaveChatroomMsg::LeaveChatroomMsg)msg, cli_sock);
             break;
+        case ENTER_CHATROOM:
+            enterChatroom((EnterChatroomMsg::EnterChatroomMsg)msg, cli_sock);
+            break;
         default:
             fprintf(stderr, "Msg %s wasn't recognized in Server::respondToRequest\n", BaseMessage.log(msg));
             close(cli_sock); // close the connection
@@ -143,6 +150,7 @@ void Server::dump()
 
 void Server::chooseUsername(ChooseUsernameMsg::ChooseUsernameMsg& msg, int cli_sock)
 {
+
     // Associate IP address with a username
     IPaddrStruct* IPaddr = getIPaddrStructFromSocket(int cli_sock);
     // Add that peer to the list of floating peers
@@ -150,27 +158,44 @@ void Server::chooseUsername(ChooseUsernameMsg::ChooseUsernameMsg& msg, int cli_s
     {
         Peer peer = new Peer(IPaddr, msg.getUsername());
         m_floatingPeers.push_back(peer);
-
+    } else {
+        Chatroom curChatrom = getChatroom(msg.getChatroomName());
+        curChatroom.updatePeerUsername(IPaddr, msg.getUsername);
     }
-    // TODO
-    curChatroom.updateUser(msg.getUsername)
 }
-
 void Server::updateRecipients(NotifyDroppedPeerMsg::NotifyDroppedPeerMsg& msg)
 {
+
+    //TODO Socket Connection was terminated in respondToRequest. Do you need to reconnect? -Andrew
+
     // for the appropriate chatroom
-    curChatroom = Chatrooms.getChatroom(msg.getChatroomName());
+    curChatroom = getChatroom(msg.getChatroomName());
     // update the peers affected by most recent change
     // TODO mutex lock
-    curChatroom.dropPeer(msg.getDroppedIpP2S(), msg.getDroppedPortP2S());
+    IPaddrStruct* IPaddr = msg.getDroppedIpP2S();
+    // notify dropped peer
+    int indexRemoved = curChatroom.dropPeer(IPaddr);
+    UpdateRecipientStruct* updateRecipientStruct = curChatroom.getUpdateStruct(indexRemoved);
+    // TODO unlock mutex
 
+    // TODO put message to first peer in queue
+    // TODO put message to second peer in queue
 }
 
 void Server::listChatrooms(ListChatroomMsg::ListChatroomMsg& msg, int cli_sock)
 {
     // for each of the chatrooms,
-        // get the toString
-    // create the appropriate message and send the payload
+    std::ostringstream output;
+    bool requiresComma = false;
+    for (std::list<Chatroom>::iterator it=m_chatrooms.begin(); it != m_chatrooms.end(); ++it)
+    {
+        if (requiresComma){
+            output << ",";
+        }
+        requiresComma = true;
+        output << it->getName();
+    }
+    // TODO create the appropriate message and send the payload
 }
 
 void Server::createChatroom(CreateChatroomMsg::CreateChatroomMsg& msg, int cli_sock)
@@ -181,21 +206,48 @@ void Server::createChatroom(CreateChatroomMsg::CreateChatroomMsg& msg, int cli_s
         //Add to list of chatrooms // new Chatroom;
         m_chatrooms.push_back(new Chatroom(new std::string(msg.)))
     }
-    //else,
-    //Send “forbidden” message
+    else
+    {
+        //Send “forbidden” message
+    }
 }
 
 void Server::destroyChatroom(DestroyChatroomMsg::DestroyChatroomMsg& msg, int cli_sock)
 {
-    getChatroom()
+    Chatroom chatroom = msg.getChatroom();
     //If the chatroom isn’t empty,
-    //Send forbidden message
-    //Else
-    //Destroy chatroom and remove it from list of chatrooms // delete Chatroom
+    if (chatroom.getSize() > 0){
+        // TODO Send forbidden message
+    } else {
+        m_chatrooms.erase(chatroom);
+        // TODO send confirmation message
+    }
 }
 
 void Server::leaveChatroom(LeaveChatroomMsg::LeaveChatroomMsg& msg, int cli_sock)
 {
+    // For the appropriate chatroom
+    Chatroom* chatroom = getChatroom(msg.getChatroomName);
+    // remove the peer from the list --> move into list of floating peers
+    Peer* peer = chatroom->removePeer(getIPaddrStructFromSocket(cli_sock));
+    // chatroom->removePeer();
+    m_floatingPeers.push_back(*peer);
+}
+
+void Server::enterChatroom(EnterChatroomMsg::EnterChatroomMsg& msg, int cli_sock)
+{
+    Peer* peerToMove == nullptr;
+    for (std::list<Peer>::iterator it=m_floatingPeers.begin(); it != m_floatingPeers.end(); ++it)
+    {
+        if (it->getIPaddr().IPaddr.s_addr == msg.getIPadr().IPaddr.s_addr){
+            peerToMove = it;
+            m_floatingPeers.erase(it);
+        }
+    }
+    if (peerToMove == nullptr){
+        // TODO send forbidden message
+    }
+
     // For the appropriate chatroom
     Chatroom* chatroom = getChatroom(msg.getChatroomName);
     // remove the peer from the list --> move into list of floating peers
@@ -234,7 +286,7 @@ Chatrooom::Chatroom* getChatroom(const std::string& chatroomName)
 {
     for (std::list<Chatroom>::iterator it=m_chatrooms.begin(); it != m_chatrooms.end(); ++it)
     {
-        if (strcmp(it->toString(), chatroomName)){
+        if (strcmp(it->toString(), chatroomName) == 0){
             return it;
         }
     }
