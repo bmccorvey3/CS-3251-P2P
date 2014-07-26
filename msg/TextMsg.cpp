@@ -8,10 +8,11 @@
 
 #include "TextMsg.h"
 #define POS_TXT_PREFIX 0 // position of "txt:"
-const std::string TextMsg::m_prefixStr = "txt:";
+const string TextMsg::m_prefixStr = "txt:";
 
-TextMsg::TextMsg(std::string username, std::string chatRoomName, std::string payload) : BaseMessage(username,Direction::P2P, chatRoomName)
+TextMsg::TextMsg(string username, string chatRoomName, string payload) : BaseMessage(username,Direction::P2P, chatRoomName)
 {
+    m_payloadString = payload;
     m_textPayload = payload;
     m_messageType = MessageType::TEXT;
     m_length = HEADER_LENGTH + sizeof(m_textPayload) + sizeof(m_prefixStr);
@@ -58,12 +59,6 @@ std::string TextMsg::getTextPayload() {
     return m_textPayload;
 }
 
-std::string TextMsg::getPrefixStr() {
-    return m_prefixStr;
+string TextMsg::getPayloadString() {
+    return m_payloadString;
 }
-
-//std::string TextMsg::getPayloadText() {
-//    std::string payload = getStringFromPayload(BaseMessage::payload);
-//    unsigned long first = payload.find_last_of(": ");
-//    return payload.substr(first+1);
-//}
