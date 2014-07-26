@@ -9,6 +9,17 @@
 /* Begin PBXBuildFile section */
 		8467A93919845820005CADC3 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8467A93819845820005CADC3 /* main.cpp */; };
 		8467A93B19845820005CADC3 /* TestingMessage.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8467A93A19845820005CADC3 /* TestingMessage.1 */; };
+		8467A9571984588D005CADC3 /* BaseMessage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8467A9421984588D005CADC3 /* BaseMessage.cpp */; };
+		8467A9581984588D005CADC3 /* ChooseUsernameMsg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8467A9441984588D005CADC3 /* ChooseUsernameMsg.cpp */; };
+		8467A9591984588D005CADC3 /* CreateChatroomMsg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8467A9461984588D005CADC3 /* CreateChatroomMsg.cpp */; };
+		8467A95A1984588D005CADC3 /* DestroyChatroomMsg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8467A9481984588D005CADC3 /* DestroyChatroomMsg.cpp */; };
+		8467A95B1984588D005CADC3 /* EnterChatroomMsg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8467A94A1984588D005CADC3 /* EnterChatroomMsg.cpp */; };
+		8467A95C1984588D005CADC3 /* LeaveChatroomMsg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8467A94C1984588D005CADC3 /* LeaveChatroomMsg.cpp */; };
+		8467A95D1984588D005CADC3 /* ListChatroomMsg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8467A94E1984588D005CADC3 /* ListChatroomMsg.cpp */; };
+		8467A95E1984588D005CADC3 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8467A9501984588D005CADC3 /* main.cpp */; };
+		8467A95F1984588D005CADC3 /* NotifyDroppedPeerMsg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8467A9511984588D005CADC3 /* NotifyDroppedPeerMsg.cpp */; };
+		8467A9601984588D005CADC3 /* TextMsg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8467A9531984588D005CADC3 /* TextMsg.cpp */; };
+		8467A9611984588D005CADC3 /* UpdateRecipientsMsg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8467A9551984588D005CADC3 /* UpdateRecipientsMsg.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -28,6 +39,27 @@
 		8467A93519845820005CADC3 /* TestingMessage */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = TestingMessage; sourceTree = BUILT_PRODUCTS_DIR; };
 		8467A93819845820005CADC3 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		8467A93A19845820005CADC3 /* TestingMessage.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = TestingMessage.1; sourceTree = "<group>"; };
+		8467A9421984588D005CADC3 /* BaseMessage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BaseMessage.cpp; sourceTree = "<group>"; };
+		8467A9431984588D005CADC3 /* BaseMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BaseMessage.h; sourceTree = "<group>"; };
+		8467A9441984588D005CADC3 /* ChooseUsernameMsg.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ChooseUsernameMsg.cpp; sourceTree = "<group>"; };
+		8467A9451984588D005CADC3 /* ChooseUsernameMsg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChooseUsernameMsg.h; sourceTree = "<group>"; };
+		8467A9461984588D005CADC3 /* CreateChatroomMsg.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CreateChatroomMsg.cpp; sourceTree = "<group>"; };
+		8467A9471984588D005CADC3 /* CreateChatroomMsg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CreateChatroomMsg.h; sourceTree = "<group>"; };
+		8467A9481984588D005CADC3 /* DestroyChatroomMsg.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DestroyChatroomMsg.cpp; sourceTree = "<group>"; };
+		8467A9491984588D005CADC3 /* DestroyChatroomMsg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DestroyChatroomMsg.h; sourceTree = "<group>"; };
+		8467A94A1984588D005CADC3 /* EnterChatroomMsg.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = EnterChatroomMsg.cpp; sourceTree = "<group>"; };
+		8467A94B1984588D005CADC3 /* EnterChatroomMsg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EnterChatroomMsg.h; sourceTree = "<group>"; };
+		8467A94C1984588D005CADC3 /* LeaveChatroomMsg.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LeaveChatroomMsg.cpp; sourceTree = "<group>"; };
+		8467A94D1984588D005CADC3 /* LeaveChatroomMsg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LeaveChatroomMsg.h; sourceTree = "<group>"; };
+		8467A94E1984588D005CADC3 /* ListChatroomMsg.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ListChatroomMsg.cpp; sourceTree = "<group>"; };
+		8467A94F1984588D005CADC3 /* ListChatroomMsg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ListChatroomMsg.h; sourceTree = "<group>"; };
+		8467A9501984588D005CADC3 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		8467A9511984588D005CADC3 /* NotifyDroppedPeerMsg.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = NotifyDroppedPeerMsg.cpp; sourceTree = "<group>"; };
+		8467A9521984588D005CADC3 /* NotifyDroppedPeerMsg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NotifyDroppedPeerMsg.h; sourceTree = "<group>"; };
+		8467A9531984588D005CADC3 /* TextMsg.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TextMsg.cpp; sourceTree = "<group>"; };
+		8467A9541984588D005CADC3 /* TextMsg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TextMsg.h; sourceTree = "<group>"; };
+		8467A9551984588D005CADC3 /* UpdateRecipientsMsg.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UpdateRecipientsMsg.cpp; sourceTree = "<group>"; };
+		8467A9561984588D005CADC3 /* UpdateRecipientsMsg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UpdateRecipientsMsg.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -61,9 +93,39 @@
 			isa = PBXGroup;
 			children = (
 				8467A93819845820005CADC3 /* main.cpp */,
+				8467A9411984588D005CADC3 /* msg */,
 				8467A93A19845820005CADC3 /* TestingMessage.1 */,
 			);
 			path = TestingMessage;
+			sourceTree = "<group>";
+		};
+		8467A9411984588D005CADC3 /* msg */ = {
+			isa = PBXGroup;
+			children = (
+				8467A9421984588D005CADC3 /* BaseMessage.cpp */,
+				8467A9431984588D005CADC3 /* BaseMessage.h */,
+				8467A9441984588D005CADC3 /* ChooseUsernameMsg.cpp */,
+				8467A9451984588D005CADC3 /* ChooseUsernameMsg.h */,
+				8467A9461984588D005CADC3 /* CreateChatroomMsg.cpp */,
+				8467A9471984588D005CADC3 /* CreateChatroomMsg.h */,
+				8467A9481984588D005CADC3 /* DestroyChatroomMsg.cpp */,
+				8467A9491984588D005CADC3 /* DestroyChatroomMsg.h */,
+				8467A94A1984588D005CADC3 /* EnterChatroomMsg.cpp */,
+				8467A94B1984588D005CADC3 /* EnterChatroomMsg.h */,
+				8467A94C1984588D005CADC3 /* LeaveChatroomMsg.cpp */,
+				8467A94D1984588D005CADC3 /* LeaveChatroomMsg.h */,
+				8467A94E1984588D005CADC3 /* ListChatroomMsg.cpp */,
+				8467A94F1984588D005CADC3 /* ListChatroomMsg.h */,
+				8467A9501984588D005CADC3 /* main.cpp */,
+				8467A9511984588D005CADC3 /* NotifyDroppedPeerMsg.cpp */,
+				8467A9521984588D005CADC3 /* NotifyDroppedPeerMsg.h */,
+				8467A9531984588D005CADC3 /* TextMsg.cpp */,
+				8467A9541984588D005CADC3 /* TextMsg.h */,
+				8467A9551984588D005CADC3 /* UpdateRecipientsMsg.cpp */,
+				8467A9561984588D005CADC3 /* UpdateRecipientsMsg.h */,
+			);
+			name = msg;
+			path = ../../msg;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -117,6 +179,17 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8467A9611984588D005CADC3 /* UpdateRecipientsMsg.cpp in Sources */,
+				8467A95A1984588D005CADC3 /* DestroyChatroomMsg.cpp in Sources */,
+				8467A95C1984588D005CADC3 /* LeaveChatroomMsg.cpp in Sources */,
+				8467A95E1984588D005CADC3 /* main.cpp in Sources */,
+				8467A9571984588D005CADC3 /* BaseMessage.cpp in Sources */,
+				8467A9581984588D005CADC3 /* ChooseUsernameMsg.cpp in Sources */,
+				8467A95D1984588D005CADC3 /* ListChatroomMsg.cpp in Sources */,
+				8467A95B1984588D005CADC3 /* EnterChatroomMsg.cpp in Sources */,
+				8467A9601984588D005CADC3 /* TextMsg.cpp in Sources */,
+				8467A95F1984588D005CADC3 /* NotifyDroppedPeerMsg.cpp in Sources */,
+				8467A9591984588D005CADC3 /* CreateChatroomMsg.cpp in Sources */,
 				8467A93919845820005CADC3 /* main.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
