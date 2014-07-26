@@ -7,35 +7,52 @@
 //
 
 #include "TextMsg.h"
+#define POS_TXT_PREFIX 0 // position of "txt:"
 
 TextMsg::TextMsg(unsigned int length, char* username, unsigned int salt,
                  char* type, void* payload) : BaseMessage(length,username,salt,
                                                           type,payload) {}
-
+const std::string TextMsg::m_prefixStr = "txt:";
 TextMsg::~TextMsg() {}
 
-unsigned int TextMsg::getLength() {
-    return BaseMessage::l;
+TextMsg::TextMsg(void* input) : BaseMessage(input){
+    char* textPayload = (char*) malloc(m_length);
+    memcpy(textPayload, &((char*)input)[HEADER_LENGTH], m_length);
+    std::string tempTextPayload(textPayload);
+    if(tempTextPayload.find(m_prefixStr) == POS_TXT_PREFIX){
+        m_textPayload = std::string(textPayload);
+        // cut down on string to what we actuall want
+        m_textPayload = m_textPayload.substr(POS_TXT_PREFIX+m_prefixStr.size());
+        // TODO deallocate m_textPayload in destructor
+    } else {
+        fprintf(stderr, "Couldn't find 'txt:' in text payload\n");
+        // TODO add log information
+    }
+    // free textPayload; // TODO do I need this?
 }
 
-char* TextMsg::getUsername() {
-    return BaseMessage::user;
-}
-
-unsigned int TextMsg::getSalt() {
-    return BaseMessage::salt;
-}
-
-char* TextMsg::getType() {
-    return BaseMessage::type;
-}
+//unsigned int TextMsg::getLength() {
+//    return BaseMessage::l;
+//}
+//
+//char* TextMsg::getUsername() {
+//    return BaseMessage::user;
+//}
+//
+//unsigned int TextMsg::getSalt() {
+//    return BaseMessage::salt;
+//}
+//
+//char* TextMsg::getType() {
+//    return BaseMessage::type;
+//}
 
 void* TextMsg::getPayload() {
     return BaseMessage::payload;
 }
 
 Direction TextMsg::getDirection() {
-    return Direction::TEXT;
+    return Direction::P2P;
 }
 
 std::string TextMsg::getStringFromPayload(void* payload) {

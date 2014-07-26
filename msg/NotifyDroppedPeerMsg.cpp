@@ -37,7 +37,7 @@ void* NotifyDroppedPeerMsg::getPayload() {
 }
 
 Direction NotifyDroppedPeerMsg::getDirection() {
-    Direction dir = Direction::NONE;
+    Direction dir = Direction::ERROR;
     char peerServer[] = "pdsp";
     char serverPeer[] = "pdsp";
     char serverPeer2[] = "pksp";

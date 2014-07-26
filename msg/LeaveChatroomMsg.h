@@ -16,7 +16,7 @@ class LeaveChatroomMsg : public BaseMessage {
     public :
     LeaveChatroomMsg(unsigned int length, char* username, unsigned int salt,
             char* type, void* payload);
-    ~LeaveChatroomMsg();
+    ~LeaveChatroomMsg(); //TODO delete pointers
     unsigned int getLength();
     char* getUsername();
     unsigned int getSalt();

@@ -8,35 +8,56 @@
 
 #include "DestroyChatroomMsg.h"
 
-DestroyChatroomMsg::DestroyChatroomMsg(unsigned int length, char* username,
+/*DestroyChatroomMsg::DestroyChatroomMsg(unsigned int length, char* username,
                                        unsigned int salt, char* type,
                                        void* payload) : BaseMessage(length,
-                                                username,salt,type,payload) {}
+                                                username,salt,type,payload) {}*/
+
+DestroyChatroomMsg::DestroyChatroomMsg(Direction dir, MessageType type, string chatRoomName) {
+    m_dir = dir;
+    std::stringstream ss;
+    if(dir == Direction::P2S && type == MessageType::CREATE_P2S) {
+        ss<<"Create chatroom" << chatRoomName << ".";
+        m_payload = ss.str();
+    }
+    else if (dir == Direction::S2P && type == MessageType::CREATE_S2P) {
+        ss<<"Chatroom" << chatRoomName << "created";
+        m_payload = ss.str();
+    }
+    else if (dir == Direction::S2P && type == MessageType::ERR_CREATE_S2P) {
+        ss<<"Chatroom"<<chatRoomName<<"already exists; please pick another name.";
+        m_payload = ss.str();
+    }
+    
+
+}
 
 DestroyChatroomMsg::~DestroyChatroomMsg() {}
 
 unsigned int DestroyChatroomMsg::getLength() {
-    return BaseMessage::l;
+    return m_length;
 }
 
-char* DestroyChatroomMsg::getUsername() {
-    return BaseMessage::user;
+string DestroyChatroomMsg::getUsername() {
+    return m_username;
 }
 
 unsigned int DestroyChatroomMsg::getSalt() {
-    return BaseMessage::salt;
+    return m_salt;
 }
 
-char* DestroyChatroomMsg::getType() {
-    return BaseMessage::type;
+string DestroyChatroomMsg::getType() {
+    return m_string_type;
 }
 
-void* DestroyChatroomMsg::getPayload() {
-    return BaseMessage::payload;
+string DestroyChatroomMsg::getPayload() {
+    return m_payload;
 }
+
+/*
 
 Direction DestroyChatroomMsg::getDirection() {
-    Direction dir = Direction::NONE;
+    Direction dir = Direction::ERROR;
     char peerServer[] = "dsps";
     char serverPeer[] = "dssp";
     char serverPeer2[] = "dnsp";
@@ -71,3 +92,5 @@ std::string DestroyChatroomMsg::getDestroyedChatRoomS2P() {
     unsigned long first = chatRoom.find_first_of(" destroyed");
     return chatRoom.substr(last+1,first-last-1);
 }
+
+*/

@@ -35,7 +35,7 @@ void* ListChatroomMsg::getPayload() {
 }
 
 Direction ListChatroomMsg::getDirection() {
-    Direction dir = Direction::NONE;
+    Direction dir = Direction::ERROR;
     char peerServer[] = "lsps";
     char serverPeer[] = "lssp";
     for(int i = 0; i<(sizeof(BaseMessage::type)/BaseMessage::type[0]); ++i) {

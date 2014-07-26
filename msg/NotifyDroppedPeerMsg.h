@@ -16,7 +16,7 @@ class NotifyDroppedPeerMsg : public BaseMessage {
     public :
     NotifyDroppedPeerMsg(unsigned int length, char* username, unsigned int salt,
             char* type, void* payload);
-    ~NotifyDroppedPeerMsg();
+    ~NotifyDroppedPeerMsg(); //TODO delete pointers
     unsigned int getLength();
     char* getUsername();
     unsigned int getSalt();

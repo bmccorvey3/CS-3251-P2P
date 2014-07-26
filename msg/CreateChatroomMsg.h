@@ -13,19 +13,25 @@
 #include "BaseMessage.h"
 
 class CreateChatroomMsg : public BaseMessage {
-    public :
-    CreateChatroomMsg(unsigned int length, char* username, unsigned int salt,
-            char* type, void* payload);
-    ~CreateChatroomMsg();
+public :
+    //CreateChatroomMsg(unsigned int length, char* username, unsigned int salt,
+     //       char* type, void* payload);
+    CreateChatroomMsg(Direction dir, MessageType type, string chatRoomName);
+    ~CreateChatroomMsg(); //TODO delete pointers
     unsigned int getLength();
-    char* getUsername();
+    string getUsername();
     unsigned int getSalt();
-    char* getType();
-    void* getPayload();
+    string getType();
+    string getPayload();
+    
+    void parseSpecificMessage(void* msg);
+    
+    /*
     Direction getDirection();
     std::string getStringFromPayload(void*);
     std::string getChatRoomFromPayloadP2S();
     std::string getChatRoomFromPayloadS2P();
+    */
 };
 
 

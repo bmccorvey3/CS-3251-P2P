@@ -16,12 +16,12 @@ class DestroyChatroomMsg : public BaseMessage {
     public :
     DestroyChatroomMsg(unsigned int length, char* username, unsigned int salt,
             char* type, void* payload);
-    ~DestroyChatroomMsg();
+    ~DestroyChatroomMsg(); //TODO delete pointers
     unsigned int getLength();
-    char* getUsername();
+    string getUsername();
     unsigned int getSalt();
-    char* getType();
-    void* getPayload();
+    string getType();
+    string getPayload();
     Direction getDirection();
     std::string getStringFromPayload(void*);
     std::string getDestroyedChatRoomP2S();

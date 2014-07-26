@@ -16,7 +16,7 @@ class ListChatroomMsg : public BaseMessage {
     public :
     ListChatroomMsg(unsigned int length, char* username, unsigned int salt,
             char* type, void* payload);
-    ~ListChatroomMsg();
+    ~ListChatroomMsg(); //TODO delete pointers
     unsigned int getLength();
     char* getUsername();
     unsigned int getSalt();

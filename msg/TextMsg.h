@@ -16,8 +16,10 @@ class TextMsg : public BaseMessage {
 public :
     TextMsg(unsigned int length, char* username, unsigned int salt,
             char* type, void* payload);
-    ~TextMsg();
-    unsigned int getLength();
+    TextMsg(void* input);
+    ~TextMsg(); //TODO delete pointers
+    
+    unsigned int getLength(); 
     char* getUsername();
     unsigned int getSalt();
     char* getType();
@@ -25,6 +27,8 @@ public :
     Direction getDirection();
     std::string getStringFromPayload(void*);
     std::string getPayloadText();
+    std::string m_textPayload;
+    const static std::string m_prefixStr;
 };
 
 #endif /* defined(__MessageHierarchyP2P__TextMsg__) */

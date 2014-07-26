@@ -35,7 +35,7 @@ void* EnterChatroomMsg::getPayload() {
 }
 
 Direction EnterChatroomMsg::getDirection() {
-    Direction dir = Direction::NONE;
+    Direction dir = Direction::ERROR;
     char peerServer[] = "enps";
     char serverPeer[] = "ensp";
     char serverPeer2[] = "efsp";

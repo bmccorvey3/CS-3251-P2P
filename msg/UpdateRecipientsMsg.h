@@ -16,7 +16,7 @@ class UpdateRecipientsMsg : public BaseMessage {
     public :
     UpdateRecipientsMsg(unsigned int length, char* username, unsigned int salt,
             char* type, void* payload);
-    ~UpdateRecipientsMsg();
+    ~UpdateRecipientsMsg(); //TODO delete pointers
     unsigned int getLength();
     char* getUsername();
     unsigned int getSalt();

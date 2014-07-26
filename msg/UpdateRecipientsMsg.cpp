@@ -37,7 +37,7 @@ void* UpdateRecipientsMsg::getPayload() {
 }
 
 Direction UpdateRecipientsMsg::getDirection() {
-    Direction dir = Direction::NONE;
+    Direction dir = Direction::ERROR;
     char peerServer[] = "upps";
     char serverPeer[] = "upsp";
     for(int i = 0; i<(sizeof(BaseMessage::type)/BaseMessage::type[0]); ++i) {
