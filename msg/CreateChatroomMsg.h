@@ -20,16 +20,38 @@ public :
     
     void* getMessageStruct();
     
-    string getChoosePayload();
+    string getChatRoomNamePayload();
+    string getPayloadString();
+
     
 private:
-    string m_createPayload;
+    string m_chatRoomNamePayload;
     const static string m_prefixP2S;
     const static string m_prefixS2P;
     const static string m_prefixS2P_ERR;
     const static string m_postfixP2S;
     const static string m_postFixS2P;
     const static string m_postfixS2P_ERR;
+    static const size_t p2sTotalPayloadSize = sizeof(m_chatRoomNamePayload)+ sizeof(m_prefixP2S) +
+                                                sizeof(m_postfixP2S);
+    static const size_t s2pTotalPayloadSize = sizeof(m_chatRoomNamePayload) + sizeof(m_prefixS2P)
+                                                + sizeof(m_postFixS2P);
+    static const size_t s2pErrTotalPayloadSize = sizeof(m_chatRoomNamePayload) +
+                            + sizeof(m_prefixS2P_ERR) + sizeof(m_postfixS2P_ERR);
+    
+    typedef struct __attribute__((packed)) FULL_MESSAGE_P2S {
+        StBaseHeader stBaseHeader;
+        char payload[p2sTotalPayloadSize];
+    } FullMessageP2S;
+    typedef struct __attribute__((packed)) FULL_MESSAGE_S2P {
+        StBaseHeader stBaseHeader;
+        char payload[s2pTotalPayloadSize];
+    } FullMessageS2P;
+    typedef struct __attribute__((packed)) FULL_MESSAGE_S2P_ERR {
+        StBaseHeader stBaseHeader;
+        char payload[s2pErrTotalPayloadSize];
+    } FullMessageS2PErr;
+
 };
 
 

@@ -72,7 +72,7 @@ typedef struct header_t {
 
 class BaseMessage {
 public:
-//    BaseMessage(); // TODO add m_salt = rand();
+    //BaseMessage(); // TODO add m_salt = rand();
     BaseMessage(void* parseMe);
     BaseMessage(string username, Direction dir, string chatRoomName);
     
@@ -110,9 +110,11 @@ public:
     // Get struct to output to socket
     virtual void* getMessageStruct() = 0;
     // Print out debug info
-    static string log(BaseMessage&);
+    static string log(BaseMessage*);
     // Get message that can be cast to another kind of message from a void*
     static BaseMessage* getInstance(void*);
+    
+    virtual string getPayloadString() = 0;
     
    // static virtual BaseMessage* getParticularMessage() = 0;
     
@@ -126,6 +128,7 @@ protected:
     Direction m_dir;
     string m_chatRoomName;
     void* m_payload;
+    string m_payloadString;
 };
 
 #endif /* defined(__MessageHierarchyP2P__BaseMessage__) */

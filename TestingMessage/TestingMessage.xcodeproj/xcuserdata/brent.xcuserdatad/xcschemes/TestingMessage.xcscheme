@@ -14,10 +14,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "84CAD215197EB9B600532818"
-               BuildableName = "MessageHierarchyP2P"
-               BlueprintName = "MessageHierarchyP2P"
-               ReferencedContainer = "container:MessageHierarchyP2P.xcodeproj">
+               BlueprintIdentifier = "8467A93419845820005CADC3"
+               BuildableName = "TestingMessage"
+               BlueprintName = "TestingMessage"
+               ReferencedContainer = "container:TestingMessage.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -32,10 +32,10 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "84CAD215197EB9B600532818"
-            BuildableName = "MessageHierarchyP2P"
-            BlueprintName = "MessageHierarchyP2P"
-            ReferencedContainer = "container:MessageHierarchyP2P.xcodeproj">
+            BlueprintIdentifier = "8467A93419845820005CADC3"
+            BuildableName = "TestingMessage"
+            BlueprintName = "TestingMessage"
+            ReferencedContainer = "container:TestingMessage.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
    </TestAction>
@@ -51,10 +51,10 @@
       <BuildableProductRunnable>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "84CAD215197EB9B600532818"
-            BuildableName = "MessageHierarchyP2P"
-            BlueprintName = "MessageHierarchyP2P"
-            ReferencedContainer = "container:MessageHierarchyP2P.xcodeproj">
+            BlueprintIdentifier = "8467A93419845820005CADC3"
+            BuildableName = "TestingMessage"
+            BlueprintName = "TestingMessage"
+            ReferencedContainer = "container:TestingMessage.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <AdditionalOptions>
@@ -69,10 +69,10 @@
       <BuildableProductRunnable>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "84CAD215197EB9B600532818"
-            BuildableName = "MessageHierarchyP2P"
-            BlueprintName = "MessageHierarchyP2P"
-            ReferencedContainer = "container:MessageHierarchyP2P.xcodeproj">
+            BlueprintIdentifier = "8467A93419845820005CADC3"
+            BuildableName = "TestingMessage"
+            BlueprintName = "TestingMessage"
+            ReferencedContainer = "container:TestingMessage.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

@@ -20,13 +20,31 @@ public :
     
     void* getMessageStruct();
     
-    string getleavePayload();
+    string getLeaveUserPayload();
+    string getLeaveChatroomPayload();
+    string getPayloadString();
+
     
 private:
-    string m_leavePayload;
+    string m_leaveUserPayload;
+    string m_leaveChatroomPayload;
     const static string m_prefixS2P;
     const static string m_postfixP2S;
-    const static string m_postFixS2P;
+    const static string m_postfixS2P;
+    
+    static const size_t p2sTotalPayloadSize = sizeof(m_leaveUserPayload)+ sizeof(m_postfixP2S);
+    static const size_t s2pTotalPayloadSize = sizeof(m_leaveUserPayload) + sizeof(m_prefixS2P)
+    + sizeof(m_postfixS2P) + sizeof(m_leaveChatroomPayload);
+    
+    typedef struct __attribute__((packed)) FULL_MESSAGE_P2S {
+        StBaseHeader stBaseHeader;
+        char payload[p2sTotalPayloadSize];
+    } FullMessageP2S;
+    typedef struct __attribute__((packed)) FULL_MESSAGE_S2P {
+        StBaseHeader stBaseHeader;
+        char payload[s2pTotalPayloadSize];
+    } FullMessageS2P;
+
 };
 
 #endif /* defined(__MessageHierarchyP2P__LeaveChatroomMsg__) */

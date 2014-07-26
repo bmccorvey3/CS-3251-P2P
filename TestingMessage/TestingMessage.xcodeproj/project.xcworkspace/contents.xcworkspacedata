@@ -2,6 +2,6 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "self:MessageHierarchyP2P.xcodeproj">
+      location = "self:TestingMessage.xcodeproj">
    </FileRef>
 </Workspace>

@@ -8,118 +8,112 @@
 
 #include "CreateChatroomMsg.h"
 
-/*
-CreateChatroomMsg::CreateChatroomMsg(unsigned int length, char* username,
-                                     unsigned int salt, char* type,
-                                     void* payload) : BaseMessage(length,
-                                                username,salt,type,payload) {}
-*/
+const string CreateChatroomMsg::m_prefixP2S = "Create chatroom";
+const string CreateChatroomMsg::m_prefixS2P = "Chatroom";
+const string CreateChatroomMsg::m_prefixS2P_ERR = "Chatroom";
+const string CreateChatroomMsg::m_postfixP2S = ".";
+const string CreateChatroomMsg::m_postFixS2P = "created.";
+const string CreateChatroomMsg::m_postfixS2P_ERR = "already exists; please pick another name" ;
 
-CreateChatroomMsg::CreateChatroomMsg(Direction dir, MessageType type, string chatRoomName) {
-    m_dir = dir;
-    std::stringstream ss;
-    if(dir == Direction::P2S && type == MessageType::CREATE_P2S) {
-        ss<<"Create chatroom" << chatRoomName << ".";
-        m_payload = ss.str();
+CreateChatroomMsg::CreateChatroomMsg(string username, Direction dir, string chatRoomName, string payload)
+: BaseMessage(username, dir, chatRoomName)
+{
+    m_payloadString = payload;
+    m_chatRoomNamePayload = payload;
+    if(dir == Direction::P2S) {
+        m_messageType = MessageType::CREATE_P2S;
+        m_length = HEADER_LENGTH + p2sTotalPayloadSize;
+        m_code = "crps";
     }
-    else if (dir == Direction::S2P && type == MessageType::CREATE_S2P) {
-        ss<<"Chatroom" << chatRoomName << "created";
-        m_payload = ss.str();
+    else if (dir == Direction::S2P) {
+        m_messageType = MessageType::CREATE_S2P;
+        m_length = HEADER_LENGTH + s2pTotalPayloadSize;
+        m_code = "crsp";
     }
-    else if (dir == Direction::S2P && type == MessageType::ERR_CREATE_S2P) {
-        ss<<"Chatroom"<<chatRoomName<<"already exists; please pick another name.";
-        m_payload = ss.str();
+    else if (dir == Direction::ERROR) {
+        m_messageType = MessageType::ERR_CREATE_S2P;
+        m_length =  HEADER_LENGTH + s2pErrTotalPayloadSize;
+        m_code = "cfsp";
     }
-
+    else {
+        fprintf(stderr, "Incorrect direction in CreateChatRoom!\n");
+    }
 }
- 
+
 CreateChatroomMsg::~CreateChatroomMsg() {}
 
-unsigned int CreateChatroomMsg::getLength() {
-    return m_length;
-}
-
-string CreateChatroomMsg::getUsername() {
-    return m_username;
-}
-
-unsigned int CreateChatroomMsg::getSalt() {
-    return m_salt;
-}
-
-string CreateChatroomMsg::getType() {
-    return m_string_type;
-}
-
-string CreateChatroomMsg::getPayload() {
-    return m_payload;
-}
-
-void CreateChatroomMsg::parseSpecificMessage(void* msg){
-    BaseMessage* baseMessage  = new BaseMessage(msg);
-    // getBaseMessage(msg);
-    void* payload = baseMessage->getPayloadPtr();
-    std::string *payload_ptr = static_cast<std::string*>(payload);
-    std::string payloadStr = *payload_ptr;
-    delete payload_ptr;
-    std::string createMsg = "";
-    if(baseMessage->getDirection() == Direction::P2S && baseMessage->getMessageType()
-       == MessageType::CREATE_P2S) {
-        createMsg = "Create chatroom";
+CreateChatroomMsg::CreateChatroomMsg(void* input) : BaseMessage(input) {
+    char* chatRoomPayload = (char*) malloc(m_length);
+    memcpy(chatRoomPayload, &((char*)input)[HEADER_LENGTH], m_length);
+    std::string tempChatRoomPayload(chatRoomPayload);
+    if(tempChatRoomPayload.find(m_prefixP2S) > 0){
+        m_chatRoomNamePayload = string(chatRoomPayload);
+        // cut down on string to what we actuall want
+        m_chatRoomNamePayload = m_chatRoomNamePayload.substr(m_prefixP2S.size(), m_chatRoomName.size());
+        // TODO deallocate m_textPayload in destructor
     }
-    else if(baseMessage->getDirection() == Direction::S2P && baseMessage -> getMessageType()
-            == MessageType::CREATE_S2P) {
-        createMsg = "Chatroom";
+    else if (tempChatRoomPayload.find(m_prefixS2P) > 0) {
+        m_chatRoomNamePayload = string(chatRoomPayload);
+        m_chatRoomNamePayload = m_chatRoomNamePayload.substr(m_prefixS2P.size(), m_chatRoomName.size());
     }
-    else if(baseMessage->getDirection() == Direction::S2P && baseMessage -> getMessageType()
-            == MessageType::ERR_CREATE_S2P) {
-        createMsg = "Chatroom";
+    else if (tempChatRoomPayload.find(m_postfixS2P_ERR) > 0){
+        m_chatRoomNamePayload = string(chatRoomPayload);
+        m_chatRoomNamePayload = m_chatRoomNamePayload.substr(m_prefixS2P.size(), m_chatRoomName.size());
     }
-    
-    std::string checkStr = payloadStr.substr(0, sizeof(createMsg));
-    if (createMsg != checkStr){
-        fprintf(stderr, "Incorrect payload in create chatroom message: %s", checkStr.c_str());
+    else {
+        fprintf(stderr, "Couldn't find in create chatroom payload\n");
+        // TODO add log information
     }
-    unsigned char* msg_char = static_cast<unsigned char*>(msg);
-    memcpy(&m_chatRoomName, &msg_char[sizeof(createMsg)-1], sizeof(m_chatRoomName)-1);
+    // free choosePayload; // TODO do I need this?
 }
 
-
-/*
- 
- Direction CreateChatroomMsg::getDirection() {
-    Direction dir = Direction::ERROR;
-    char peerServer[] = "crps";
-    char serverPeer[] = "crsp";
-    for(int i = 0; i<(sizeof(BaseMessage::type)/BaseMessage::type[0]); ++i) {
-        if(peerServer[i] == *(BaseMessage::type + i)) {
-            dir = Direction::P2S;
-        }
-        else if(serverPeer[i] == *(BaseMessage::type + i)) {
-            dir = Direction::S2P;
-        }
+void* CreateChatroomMsg::getMessageStruct() {
+    StBaseHeader* header = BaseMessage::getHeaderStruct();
+    header->length = m_length;
+    memcpy(&(header->code), &m_code, CODE_LENGTH);
+    void* fullMessage;
+    if(m_dir == Direction::P2S) {
+        fullMessage = (FullMessageP2S*)malloc(sizeof(FullMessageP2S));
     }
-    return dir;
+    else if (m_dir == Direction::S2P){ // S2P
+        fullMessage = (FullMessageS2P*)malloc(sizeof(FullMessageS2P));
+    }
+    else if (m_dir == Direction::ERROR) {
+        fullMessage = (FullMessageS2PErr*) malloc(sizeof(FullMessageS2PErr));
+    }
+    memcpy(fullMessage,&header,sizeof(StBaseHeader));
+    string tempPayloadStr;
+    if(m_dir == Direction::P2S) {
+        tempPayloadStr = m_prefixP2S + m_chatRoomNamePayload + m_postfixP2S;
+    }
+    else if (m_dir == Direction::S2P) {
+        tempPayloadStr = m_prefixS2P + m_chatRoomNamePayload + m_postFixS2P;
+    }
+    else if (m_dir == Direction::ERROR) {
+        tempPayloadStr = m_prefixS2P_ERR + m_chatRoomNamePayload + m_postfixS2P_ERR;
+    }
+    const char* tempPayloadStr_cstr = tempPayloadStr.c_str();
+    if(m_dir == Direction::P2S) {
+        memcpy(&((FullMessageP2S*)fullMessage)[sizeof(StBaseHeader)], &tempPayloadStr_cstr, p2sTotalPayloadSize);
+    }
+    else if(m_dir == Direction::S2P) {
+        memcpy(&((FullMessageS2P*)fullMessage)[sizeof(StBaseHeader)], &tempPayloadStr_cstr, s2pTotalPayloadSize);
+    }
+    else if(m_dir == Direction::ERROR) {
+        memcpy(&((FullMessageS2PErr*)fullMessage)[sizeof(StBaseHeader)], &tempPayloadStr_cstr, s2pErrTotalPayloadSize);
+    }
+
+    free(header);
+    return fullMessage;
 }
 
-std::string CreateChatroomMsg::getStringFromPayload(void* payload) {
-    std::string *payload_pointer = static_cast<std::string*>(payload);
-    std::string s = *payload_pointer;
-    return s;
+string CreateChatroomMsg::getChatRoomNamePayload() {
+    return m_chatRoomNamePayload;
 }
 
-std::string CreateChatroomMsg::getChatRoomFromPayloadP2S() {
-    std::string chatRoom = getStringFromPayload(BaseMessage::payload);
-    unsigned long last = chatRoom.find_last_of("chatroom ");
-    unsigned long first = chatRoom.find_first_of(".");
-    return chatRoom.substr(last+1,first-last-1);
+string CreateChatroomMsg::getPayloadString() {
+    return m_payloadString;
 }
 
-std::string CreateChatroomMsg::getChatRoomFromPayloadS2P() {
-    std::string chatRoom = getStringFromPayload(BaseMessage::payload);
-    unsigned long last = chatRoom.find_last_of("chatroom ");
-    unsigned long first = chatRoom.find_first_of(" created");
-    return chatRoom.substr(last+1,first-last-1);
-}
 
-*/
+
