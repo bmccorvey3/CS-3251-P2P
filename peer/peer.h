@@ -4,6 +4,7 @@
 #ifndef PEER_H
 #define PEER_H
 
+#include <arpa/inet.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
@@ -18,8 +19,10 @@
 #include <sstream>
 #include <iterator>
 #include <iostream>
+#include <queue>
+#include <vector>
 
-#include "sha256.h"
+#include "SHA/sha.h"
 
 #define BUFSIZE 2048
 #define serverPort 11111
@@ -31,7 +34,7 @@
 class Peer
 {
     public:
-        Peer(std::string server);
+        Peer(char *server);
         ~Peer();
 
          typedef struct sockaddr_in IPaddr_struct;
@@ -57,14 +60,14 @@ class Peer
     protected:
     private:
         /*
-        *Vector of messages sent/recieved that are hashed
+        *Vector of messages sent/received that are hashed
         */
         
         std::vector<std::string> m_messageHashes;
         /*
         *Queue that stores any messages unable to be sent to the 2 recipients
         */
-        std::queue<std::string> m_messageList;
+        std::queue<TextMsg> m_messageList;
 
         /*
         *Username used to define peer in chatroom
@@ -80,23 +83,29 @@ class Peer
         /*
         *The two recipients each peer sends text messages to
         */
-        IPAddr primaryRecipient;
-        IPAddr secondaryRecipient;
+        IPaddr primaryRecipient;
+        IPaddr secondaryRecipient;
 
         /*
         *Using the SHA256 Hash, any message recieved/sent will be hashed.
         */
-        std::string hashMessage(char *message);
+        std::string hash256Message(TextMsg message);
+
+
+        /*
+         * Updates Recipients received from server
+         */
+        void updateRecipients(std::string one, std::string two);
 
         /*
         *Forces lowercase on Strings
         */
-        std::string toLowerCase();
+        std::string toLowerCase(std::string code);
         /*
         *Notifies the server if one of the two recipients of the peer went offline
         *and timed out the ACK response
         */
-        void notifyRecipientDied();
+        void notifyRecipientDied(IPaddr recipient);
 
         /*
         *Sends a prompt of instructions to stdout
@@ -106,7 +115,7 @@ class Peer
         /*
         *Receive messages from previous peers
         */
-        void receieveFromPeer(int portno);
+        void receiveFromPeers(int portno);
 
         /*
         *Receive updates from Server
@@ -116,12 +125,12 @@ class Peer
         /*
         *Send messages to Peer; Linearly:PrimaryRecipient, SecondaryRecipient
         */
-        void sendToPeer();
+        void sendToPeers();
 
         /*
         *Send UI commands to server
         */
         void sendToServer();
+};
 
-
-}
+#endif // PEER.H

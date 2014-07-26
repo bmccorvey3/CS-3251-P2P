@@ -3,7 +3,7 @@
 
 #include "peer.h"
 
-Peer::Peer(std::string server)
+Peer::Peer(char *server)
 {
 	std::string serverName = server;
 
@@ -12,28 +12,28 @@ Peer::Peer(std::string server)
 
 	std::string username;
 
-	IPAddr primaryRecipient;
-	IPAddr secondaryRecipient;
+	IPaddr primaryRecipient;
+	IPaddr secondaryRecipient;
 
-	static p_thread_mutex_t sendRecieveMutex;
+	static pthread_mutex_t sendRecieveMutex;
 }
 
 Peer::~Peer()
 {
-	delete char *server; //Use std::string serverName(server) to get std::string of server
+	delete std::string serverName; //Use std::string serverName(server) to get std::string of server
 
-	delete Queue<std::TextMsg> m_messageList;
-	delete Vector<std::string> m_messageHashes;
+	delete std::queue<TextMsg> m_messageList;
+	delete std::vector<std::string> m_messageHashes;
 
 	delete std::string username;
 
-	delete IPAddr primaryRecipient;
-	delete IPAddr secondaryRecipient;
+	delete IPaddr primaryRecipient;
+	delete IPaddr secondaryRecipient;
 
 }
 
 
-void Peer::receiveFromPeer(int portno){
+void Peer::receiveFromPeers(int portno){
 	using namespace std;
 	void buffer[BUFSIZE];
 	void response[BUFSIZE];
@@ -43,34 +43,34 @@ void Peer::receiveFromPeer(int portno){
   this_addr.sin_family = AF_INET;
   this_addr.sin_addr.s_addr = htonl(INADDR_ANY);
   this_addr.sin_port = htons(portno);
-  bind(this_sock, (struct sockaddr_in*)&this_addr, sizeof(this_addr));
+  bind(this_sock, (struct sockaddr*)&this_addr, sizeof(this_addr));
   listen(this_sock, BUFSIZE);
 
   //Creation of Socket of Peers sending messages to this Peer
   struct sockaddr_in sender_addr; 
   socklen_t sender_len = sizeof(sender_addr);
-  int sender_sock = accept(this_sock, (struct sockaddr_in*)&sender_addr, &sender_len);
+  int sender_sock = accept(this_sock, (struct sockaddr*)&sender_addr, &sender_len);
   memset(buffer, '\0', sizeof(buffer));
   memset(response, '\0', sizeof(response));
 
-  //Receiving from other peers\
+  //Receiving from other peers
   int numBytesReceived=0;
-  while(numBytesReceived += recvfrom(sender_sock, buffer+numBytesReceived, BUFSIZE, 0, (struct sockaddr_in*)&sender_addr, &sender_len)>0){};
+  while(numBytesReceived += recvfrom(sender_sock, buffer+numBytesReceived, BUFSIZE, 0, (struct sockaddr*)&sender_addr, &sender_len)>0){};
   TextMsg message = buffer;
-  String hashed = hashMessage(message);
+  string hashed = hash256Message(message);
   bool newInstance = true;
   //Iterate to check if message has already been received
   for(int i = 0; i < m_messageHashes.size(); i++){
-  	if(strncmp(m_messageHashes[i],hashed){
+  	if(m_messageHashes[i].compare(hashed)){
   		newInstance = false;
   		break;
   	}
   }
   //Message not in hashed vector
   if(newInstance){
-  	m_messageHashes.add(hashed);
-  	m_messageList.add(message);
-  	cout << message.getMessage();
+  	m_messageHashes.push_back(hashed);
+  	m_messageList.push(message);
+  	cout << message.getPayloadText();
   }
   close(this_sock);
   close(sender_sock);
@@ -84,69 +84,69 @@ void Peer::receiveFromServer(){
   struct sockaddr_in this_addr;
   int this_sock = socket(AF_INET, SOCK_STREAM, 0);
   this_addr.sin_family = AF_INET;
-  this_addr.sin_addr.s_addr = htonl(serverName);
+  const char *server = serverName.c_str();
+  //this_addr.sin_addr.s_addr = htonl(server);
+  inet_aton(server, &this_addr.sin_addr);
   this_addr.sin_port = htons(serverPort);
-  bind(this_sock, (struct sockaddr_in*)&this_addr, sizeof(this_addr));
+  bind(this_sock, (struct sockaddr*)&this_addr, sizeof(this_addr));
   listen(this_sock, BUFSIZE);
 
-  while(1)
+  while(1){
 	  //Creation of Socket of Server Sending Data to this Peer
 	  struct sockaddr_in svr_addr; 
 	  socklen_t svr_len = sizeof(svr_addr);
-	  int svr_sock = accept(this_sock, (struct sockaddr_in*)&svr_addr, &svr_len);
+	  int svr_sock = accept(this_sock, (struct sockaddr*)&svr_addr, &svr_len);
 	  memset(buffer, '\0', sizeof(buffer));
   	  memset(response, '\0', sizeof(response));
 
 	  //Receiving from Server
-	  int numBytesRecieved = 0;
+	  int numBytesReceived = 0;
 	  while(numBytesReceived += recv(svr_sock, buffer+numBytesReceived, BUFSIZE, 0)>0){};
-  	  BaseMsg msg = buffer;
-  	  String type = buffer.getType();
-  	  String update = "update";
-  	  String dropped = "dropped";
+  	  BaseMessage msg = buffer;
+  	  string type = msg.getType();
   	  //UpdateRecipients Message
-  	  if(strcmp(type, update)){
-    		UpdateRecipientMsg update = buffer;
+  	  if(type.compare("update")){
+    		UpdateRecipientsMsg update = buffer;
     		updateRecipients(update.getPrimaryRecipients(),update.getSecondaryRecipients());
-    		cout << update.getMessage(); 
+    		cout << update.getPrimaryRecipients() << update.getSecondaryRecipients();
 
-    		response = new UpdateRecipients();
-    		while(sendto(svr_sock, response, BUFSIZE,(struct sockaddr_in*)&this_addr, sizeof(this_addr)));
+    		response = new UpdateRecipientsMsg("hi");
+    		while(send(svr_sock, response, BUFSIZE,0));
     	}
   	//Peer Dropped Message
-    	if(strcmp(type, dropped)){
-    		count << "You have been dropped";
+    	if(type.compare("dropped")){
+    		cout << "You have been dropped";
     	}
   }
 	close(this_sock);
 	close(svr_sock);
 }
 
-void Peer::sendtoPeer(){
+void Peer::sendToPeers(){
 	using namespace std;
 	void buffer[BUFSIZE];
 	void response[BUFSIZE];
 	//Timeout Structure
 	struct timeval timeout;
   	timeout.tv_sec = 120;
-  	timeout.tv_usec == 0;
+  	timeout.tv_usec = 0;
 
-	//Create Socket on port portno 22222 to send to PRimaryRecipient IPAddr
+	//Create Socket on port portno 22222 to send to PRimaryRecipient IPaddr
 	int sock = socket(AF_INET, SOCK_STREAM, 0);
   	struct sockaddr_in addr;
   	addr.sin_family = AF_INET;
   	addr.sin_port = htons(primaryPort);
-  	addr.sin_addr = PrimaryRecipient;
+  	addr.sin_addr = primaryRecipient;
 
   	//inet_aton(recipient, &addr.sin_addr.s_addr);
-  	connect(sock, (struct sockaddr_in*)&addr,sizeof(addr));
+  	connect(sock, (struct sockaddr*)&addr,sizeof(addr));
   	memset(buffer, '\0', sizeof(buffer));
   	memset(response, '\0', sizeof(response));
 
   	//Setsockopt for Timeouts
 
   	bool timed = false;
-  	if(setsockopt(sock, SOL_SOCKET, SP_SNDTIMEO, (char*)&timeout, sizeof(timeout))<0){
+  	if(setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO, (char*)&timeout, sizeof(timeout))<0){
   	}
 
   	//Send all messages in message Queue
@@ -161,7 +161,7 @@ void Peer::sendtoPeer(){
 
   	close(sock);
   	if(timed){
-  		NotifyRecipientDied(PrimaryRecipient);
+  		notifyRecipientDied(primaryRecipient);
   	}
 
   	/********************************************************
@@ -172,27 +172,27 @@ void Peer::sendtoPeer(){
   	timeout2.tv_sec = 120;
   	timeout2.tv_usec == 0;
 
-  	//Create Socket on port portno 33333 to send to SecondaryRecipient IPAddr
+  	//Create Socket on port portno 33333 to send to SecondaryRecipient IPaddr
 	int sock = socket(AF_INET, SOCK_STREAM, 0);
   	struct sockaddr_in addr;
   	addr.sin_family = AF_INET;
   	addr.sin_port = htons(secondaryPort);
-  	addr.sin_addr = SecondaryRecipient;
+  	addr.sin_addr = secondaryRecipient;
   	//inet_aton(recipient, &addr.sin_addr.s_addr);
-  	connect(sock, (struct sockaddr_in*)&addr,sizeof(addr));
+  	connect(sock,(struct sockaddr*)&addr,sizeof(addr));
   	memset(buffer, '\0', sizeof(buffer));
   	memset(response, '\0', sizeof(response));
 
 	//setsockopt for timeout
 	bool timed2 = false;
-  	if(setsockopt(sock, SOL_SOCKET, SP_SNDTIMEO, (char*)&timeout2, sizeof(timeout2))<0){
+  	if(setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO, (char*)&timeout2, sizeof(timeout2))<0){
   		
   	}
 
   	//Send all messages in message Queue
   	while(m_messageList.size > 0){
   		buffer = m_messageList.pop();
-  		while(int value =send(sock,buffer, BUFSIZE, 0){
+  		while(int value =send(sock,buffer, BUFSIZE, 0)){
   			if(value == EPIPE){
   				timed2=true;
   			}
@@ -201,97 +201,113 @@ void Peer::sendtoPeer(){
 
   	close(sock);
   	if(timed2){
-  		NotifyRecipientDied(SecondaryRecipient);
+  		notifyRecipientDied(secondaryRecipient);
   	}
 }
 
-void Peer::sendtoServer(){
+void Peer::sendToServer(){
 	using namespace std;
 	void buffer[BUFSIZE];
 	void response[BUFSIZE];
 	//Create Socket on port 11111 to send UI commands to Server
 	int sock = socket(AF_INET, SOCK_STREAM, 0);
+	struct sockaddr_in addr;
   	addr.sin_family = AF_INET;
  	addr.sin_port = htons(serverPort);
-  	inet_aton(serverName, &addr.sin_addr.s_addr);
-  	connect(sock, (struct sockaddr_in*)&addr,sizeof(addr));
+ 	const char *server = serverName.c_str();
+  	inet_aton(server, &addr.sin_addr);
+  	connect(sock, (struct sockaddr*)&addr,sizeof(addr));
   	memset(buffer, '\0', sizeof(buffer));
   	memset(response, '\0', sizeof(response));
 
   	string command;
   	cin >> command;
+  	char *commandChar = command.c_str();
 
-  	string code = strtok(buff, " ");
+  	string code = strtok(commandChar, " ");
   	string message = strtok(NULL, " ");
 
-  	code = lowerCase(code);
+  	code = toLowerCase(code);
 
-  	if(strncmp(code, "text")){
-		Textmsg textMessage = new Textmsg(message);
-		hashed = hashMessage(textMessage);
-		m_messageHashes.push(hashed);
+  	if(code.compare("text")){
+		TextMsg textMessage = new TextMsg(message);
+		string hashed = hash256Message(textMessage);
+		m_messageHashes.push_back(hashed);
 		m_messageList.push(textMessage);
 	}
-	else if(strncmp(code, "enter")){
+	else if(code.compare("enter")){
 		buffer = new EnterChatroomMsg(message);
-  		while(send(sock,buffer, BUFSIZE, 0){};	
+  		while(send(sock,buffer, BUFSIZE, 0)){};
 
-  		int numBytesRecieved = 0;
-	  	while(numBytesReceived += recvfrom(sock, response+numBytesReceived, BUFSIZE, 0, (struct sockaddr_in*)&svr_addr, &svr_len)>0){};
-  	  
-	  	cout << (EnterChatroomMsg)response.getChatRoomFromPayload();
-	}
-	else if(strncmp(code, "leave")){
-		buffer = new LeaveChatroomMsg();
-  		while(send(sock,buffer, BUFSIZE, 0){};	
+  		int numBytesReceived = 0;
+	  	while(numBytesReceived += recv(sock, response+numBytesReceived, BUFSIZE, 0)){};
 
-  		int numBytesRecieved = 0;
-	  	while(numBytesReceived += recvfrom(sock, response+numBytesReceived, BUFSIZE, 0, (struct sockaddr_in*)&svr_addr, &svr_len)>0){};
-  	  
-  	  	count << (LeaveChatroomMsg)response.getChatRoomFromPayload();
+	  	EnterChatroomMsg chat = response;
+	  	cout << chat.getChatRoomFromPayload();
 	}
-	else if(strncmp(code, "create")){
+	else if(code.compare("leave")){
+		buffer = new LeaveChatroomMsg(message);
+  		while(send(sock,buffer, BUFSIZE, 0)){};
+
+  		int numBytesReceived = 0;
+	  	while(numBytesReceived += recv(sock, response+numBytesReceived, BUFSIZE, 0)){};
+
+	  	LeaveChatroomMsg left = response;
+  	  	cout << left.getChatRoomFromPayload();
+	}
+	else if(code.compare("create")){
 		buffer = new CreateChatroomMsg(message);
-  		while(send(sock,buffer, BUFSIZE, 0){};	
+  		while(send(sock,buffer, BUFSIZE, 0)){};
 
-  		int numBytesRecieved = 0;
-	  	while(numBytesReceived += recvfrom(sock, response+numBytesReceived, BUFSIZE, 0, (struct sockaddr_in*)&svr_addr, &svr_len)>0){};
-  	  
-  	  	cout << (CreateChatroomMsg)response.getChatRoomFromPayloadS2P();
+  		int numBytesReceived = 0;
+	  	while(numBytesReceived += recv(sock, response+numBytesReceived, BUFSIZE, 0)){};
+
+  		CreateChatroomMsg created = response;
+  	  	cout << created.getChatRoomFromPayloadS2P();
 	}
-	else if(strncmp(code, "destroy")){
+	else if(code.compare("destroy")){
 		buffer = new DestroyChatroomMsg(message);
-  		while(send(sock,buffer, BUFSIZE, 0){};	
+  		while(send(sock,buffer, BUFSIZE, 0)){};
 
-  		int numBytesRecieved = 0;
-	  	while(numBytesReceived += recvfrom(sock, response+numBytesReceived, BUFSIZE, 0, (struct sockaddr_in*)&svr_addr, &svr_len)>0){};
+  		int numBytesReceived = 0;
+	  	while(numBytesReceived += recv(sock, response+numBytesReceived, BUFSIZE, 0)){};
   	  
-  	  	cout << (DestroyChatroomMsg)response.getDestroyedChatRoomS2P();
+	  	DestroyChatroomMsg destroyed = response;
+  	  	cout << destroyed.getDestroyedChatRoomS2P();
 	}
-	else if(strncmp(code, "list")){
-		buffer = new ListChatroomMsg();
-  		while(sendto(sock,buffer, BUFSIZE, 0, (struct sockaddr_in*)&addr, sizeof(addr))){};	
+	else if(code.compare("list")){
+		buffer = new ListChatroomMsg(message);
+  		while(send(sock,buffer, BUFSIZE, 0)){};
 
-  		int numBytesRecieved = 0;
-	  	while(numBytesReceived += recvfrom(sock, response+numBytesReceived, BUFSIZE, 0, (struct sockaddr_in*)&svr_addr, &svr_len)>0){};
+  		int numBytesReceived = 0;
+	  	while(numBytesReceived += recv(sock, response+numBytesReceived, BUFSIZE, 0)){};
   	
-	  	cout <<(ListChatroomMsg)response.getListofChatrooms();
+	  	ListChatroomMsg list = response;
+	  	cout << list.getListofChatrooms();
   	}
-	else if(strncmp(code, "username")){
+	else if(code.compare("username")){
 		buffer = new ChooseUsernameMsg(message);
-  		while(send(sock,buffer, BUFSIZE, 0){};	
+  		while(send(sock,buffer, BUFSIZE, 0)){};
 
-  		int numBytesRecieved = 0;
-	  	while(numBytesReceived += recvfrom(sock, response+numBytesReceived, BUFSIZE, 0, (struct sockaddr_in*)&svr_addr, &svr_len)>0){};
+  		int numBytesReceived = 0;
+	  	while(numBytesReceived += recv(sock, response+numBytesReceived, BUFSIZE, 0)){};
   	 
-  	 	cout <<(ChooseUsernameMsg)response.getUsernameS2P();
-  	 	username = response.getUsernameS2P();
+	  	ChooseUsernameMsg user = response;
+  	 	cout <<user.getUsernameP2S();
+  	 	username = user.getUsernameP2S();
 	}	
-	else if(strncmp(code, "h")){
+	else if(code.compare("h")){
 		printPrompt();
 	}
 	else{}
 	close(sock);
+}
+
+void Peer::updateRecipients(std::string one, std::string two){
+	char *oneChar = one.c_str();
+	char *twoChar = two.c_str();
+	inet_aton(oneChar, &primaryRecipient);
+	inet_aton(twoChar, &secondaryRecipient);
 }
 
 void Peer::printPrompt(){
@@ -318,30 +334,34 @@ std::string Peer::toLowerCase(std::string message){
   	return code;
 }
 
-std::string Peer::hashMessage(BaseMsg message){
+std::string Peer::hash256Message(TextMsg message){
 	char *output;
 	//SHA256().CalculateDigest(pbOutputBuffer, pbData, nDataLen);
-	SHA256().CalculateDigest(output, message.getMessage(), sizeof(message));
+	CryptoPP::SHA256::SHA256().CalculateDigest(output, (const char*)message.getPayloadText(), sizeof(message));
 	std::string returnMessage(output);
 
 	return returnMessage;
 }
 
-void Peer::NotifyRecipientDied(IPAddr recipient){
+void Peer::notifyRecipientDied(IPaddr recipient){
 using namespace std;
+	void buffer[BUFSIZE];
+	void response[BUFSIZE];
 	//Create Socket on port 11111 to send UI commands to Server
 	int sock = socket(AF_INET, SOCK_STREAM, 0);
+	struct sockaddr_in addr;
   	addr.sin_family = AF_INET;
  	addr.sin_port = htons(serverPort);
-  	inet_aton(serverName, &addr.sin_addr.s_addr);
-  	connect(sock, (struct sockaddr_in*)&addr,sizeof(addr));
+ 	const char *server = serverName.c_str();
+ 	inet_aton(server, &addr.sin_addr);
+  	connect(sock, (struct sockaddr*)&addr,sizeof(addr));
   	memset(buffer, '\0', sizeof(buffer));
   	memset(response, '\0', sizeof(response));
 
 
   	buffer = new NotifyDroppedPeerMsg(recipient);
 
-  	while(sendto(sock,buffer, BUFSIZE, 0, (struct sockaddr_in*)&addr, sizeof(addr))){};	
+  	while(send(sock,buffer, BUFSIZE, 0)){};
 
   	close(sock);
 }
