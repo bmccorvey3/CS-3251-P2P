@@ -7,6 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8467A8D819841F00005CADC3 /* peer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8467A8CA19841F00005CADC3 /* peer.cpp */; };
+		8467A8D919841F00005CADC3 /* peerDriver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8467A8CC19841F00005CADC3 /* peerDriver.cpp */; };
+		8467A8DA19841F00005CADC3 /* Chatroom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8467A8CE19841F00005CADC3 /* Chatroom.cpp */; };
+		8467A8DB19841F00005CADC3 /* List.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8467A8D019841F00005CADC3 /* List.cpp */; };
+		8467A8DC19841F00005CADC3 /* Peer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8467A8D219841F00005CADC3 /* Peer.cpp */; };
+		8467A8DD19841F00005CADC3 /* Server.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8467A8D419841F00005CADC3 /* Server.cpp */; };
+		8467A8DE19841F00005CADC3 /* TestServer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8467A8D619841F00005CADC3 /* TestServer.cpp */; };
 		84CAD21A197EB9B600532818 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84CAD219197EB9B600532818 /* main.cpp */; };
 		84CAD21C197EB9B600532818 /* MessageHierarchyP2P.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = 84CAD21B197EB9B600532818 /* MessageHierarchyP2P.1 */; };
 		84CAD255197EBA1100532818 /* BaseMessage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 84CAD241197EBA1100532818 /* BaseMessage.cpp */; };
@@ -35,6 +42,19 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		8467A8CA19841F00005CADC3 /* peer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = peer.cpp; sourceTree = "<group>"; };
+		8467A8CB19841F00005CADC3 /* peer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = peer.h; sourceTree = "<group>"; };
+		8467A8CC19841F00005CADC3 /* peerDriver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = peerDriver.cpp; sourceTree = "<group>"; };
+		8467A8CE19841F00005CADC3 /* Chatroom.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Chatroom.cpp; sourceTree = "<group>"; };
+		8467A8CF19841F00005CADC3 /* Chatroom.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Chatroom.h; sourceTree = "<group>"; };
+		8467A8D019841F00005CADC3 /* List.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = List.cpp; sourceTree = "<group>"; };
+		8467A8D119841F00005CADC3 /* List.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = List.h; sourceTree = "<group>"; };
+		8467A8D219841F00005CADC3 /* Peer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Peer.cpp; sourceTree = "<group>"; };
+		8467A8D319841F00005CADC3 /* Peer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Peer.h; sourceTree = "<group>"; };
+		8467A8D419841F00005CADC3 /* Server.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Server.cpp; sourceTree = "<group>"; };
+		8467A8D519841F00005CADC3 /* Server.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Server.h; sourceTree = "<group>"; };
+		8467A8D619841F00005CADC3 /* TestServer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestServer.cpp; sourceTree = "<group>"; };
+		8467A8D719841F00005CADC3 /* TestServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TestServer.h; sourceTree = "<group>"; };
 		84CAD216197EB9B600532818 /* MessageHierarchyP2P */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = MessageHierarchyP2P; sourceTree = BUILT_PRODUCTS_DIR; };
 		84CAD219197EB9B600532818 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		84CAD21B197EB9B600532818 /* MessageHierarchyP2P.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = MessageHierarchyP2P.1; sourceTree = "<group>"; };
@@ -71,9 +91,40 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		8467A8C919841F00005CADC3 /* peer */ = {
+			isa = PBXGroup;
+			children = (
+				8467A8CA19841F00005CADC3 /* peer.cpp */,
+				8467A8CB19841F00005CADC3 /* peer.h */,
+				8467A8CC19841F00005CADC3 /* peerDriver.cpp */,
+			);
+			name = peer;
+			path = ../peer;
+			sourceTree = "<group>";
+		};
+		8467A8CD19841F00005CADC3 /* svr */ = {
+			isa = PBXGroup;
+			children = (
+				8467A8CE19841F00005CADC3 /* Chatroom.cpp */,
+				8467A8CF19841F00005CADC3 /* Chatroom.h */,
+				8467A8D019841F00005CADC3 /* List.cpp */,
+				8467A8D119841F00005CADC3 /* List.h */,
+				8467A8D219841F00005CADC3 /* Peer.cpp */,
+				8467A8D319841F00005CADC3 /* Peer.h */,
+				8467A8D419841F00005CADC3 /* Server.cpp */,
+				8467A8D519841F00005CADC3 /* Server.h */,
+				8467A8D619841F00005CADC3 /* TestServer.cpp */,
+				8467A8D719841F00005CADC3 /* TestServer.h */,
+			);
+			name = svr;
+			path = ../svr;
+			sourceTree = "<group>";
+		};
 		84CAD20D197EB9B600532818 = {
 			isa = PBXGroup;
 			children = (
+				8467A8C919841F00005CADC3 /* peer */,
+				8467A8CD19841F00005CADC3 /* svr */,
 				84CAD218197EB9B600532818 /* MessageHierarchyP2P */,
 				84CAD217197EB9B600532818 /* Products */,
 			);
@@ -177,13 +228,20 @@
 			buildActionMask = 2147483647;
 			files = (
 				84CAD258197EBA1100532818 /* DestroyChatroomMsg.cpp in Sources */,
+				8467A8D919841F00005CADC3 /* peerDriver.cpp in Sources */,
 				84CAD25A197EBA1100532818 /* LeaveChatroomMsg.cpp in Sources */,
 				84CAD25D197EBA1100532818 /* TextMsg.cpp in Sources */,
+				8467A8DE19841F00005CADC3 /* TestServer.cpp in Sources */,
+				8467A8DD19841F00005CADC3 /* Server.cpp in Sources */,
 				84CAD255197EBA1100532818 /* BaseMessage.cpp in Sources */,
+				8467A8DC19841F00005CADC3 /* Peer.cpp in Sources */,
 				84CAD25C197EBA1100532818 /* NotifyDroppedPeerMsg.cpp in Sources */,
+				8467A8D819841F00005CADC3 /* peer.cpp in Sources */,
 				84CAD256197EBA1100532818 /* ChooseUsernameMsg.cpp in Sources */,
 				84CAD25B197EBA1100532818 /* ListChatroomMsg.cpp in Sources */,
+				8467A8DB19841F00005CADC3 /* List.cpp in Sources */,
 				84CAD259197EBA1100532818 /* EnterChatroomMsg.cpp in Sources */,
+				8467A8DA19841F00005CADC3 /* Chatroom.cpp in Sources */,
 				84CAD25E197EBA1100532818 /* UpdateRecipientsMsg.cpp in Sources */,
 				84CAD257197EBA1100532818 /* CreateChatroomMsg.cpp in Sources */,
 				84CAD21A197EB9B600532818 /* main.cpp in Sources */,
@@ -296,6 +354,7 @@
 				84CAD221197EB9B600532818 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

@@ -31,7 +31,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "134"
             endingLineNumber = "134"
-            landmarkName = "BaseMessage::convertStringToMessageType(std::string stringType, Direction &amp;direction)"
+            landmarkName = "BaseMessage::getInstance(void* input)"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
@@ -46,9 +46,7 @@
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "204"
-            endingLineNumber = "204"
-            landmarkName = "BaseMessage::getInstance(void* input)"
-            landmarkType = "5">
+            endingLineNumber = "204">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -63,7 +61,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "19"
             endingLineNumber = "19"
-            landmarkName = "TextMsg::TextMsg(void* input)"
+            landmarkName = "TextMsg::TextMsg(std::string username, std::string chatRoomName, std::string payload)"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
@@ -78,9 +76,7 @@
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "181"
-            endingLineNumber = "181"
-            landmarkName = "BaseMessage::getHeaderStruct()"
-            landmarkType = "5">
+            endingLineNumber = "181">
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>
