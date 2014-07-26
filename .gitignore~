@@ -1,1 +1,7 @@
 MessageHierarchyP2P/
+.cproject
+.project
+.settings
+TestingMessage/
+*.xcuserstate
+*.xcbkptlist

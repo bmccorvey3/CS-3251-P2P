@@ -7,7 +7,7 @@
 //
 
 #include "NotifyDroppedPeerMsg.h"
-
+/*
 NotifyDroppedPeerMsg::NotifyDroppedPeerMsg(unsigned int length, char* username,
                                            unsigned int salt,char* type,
                                            void* payload) :
@@ -79,3 +79,4 @@ std::string NotifyDroppedPeerMsg::getDroppedPortP2S() {
     unsigned long first = port.find_first_of(" dropped");
     return port.substr(last+1,first-last-1);
 }
+*/

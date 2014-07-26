@@ -8,6 +8,8 @@
 
 #include "UpdateRecipientsMsg.h"
 
+/*
+
 UpdateRecipientsMsg::UpdateRecipientsMsg(unsigned int length, char* username,
                                          unsigned int salt, char* type,
                                          void* payload) : BaseMessage(length,
@@ -70,3 +72,5 @@ std::string UpdateRecipientsMsg::getSecondaryRecipients() {
     unsigned long first = secondary.find_first_of(".");
     return secondary.substr(last+1,first-last-1);
 }
+ 
+ */

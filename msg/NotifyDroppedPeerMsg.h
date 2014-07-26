@@ -11,6 +11,7 @@
 
 #include <iostream>
 #include "BaseMessage.h"
+/*
 
 typedef struct sockaddr_in IPaddrStruct;
 //   struct sockaddr_in {
@@ -20,9 +21,9 @@ typedef struct sockaddr_in IPaddrStruct;
 //       char             sin_zero[8];  // zero this if you want to
 //   };
 //
-///*
-// * The actual IP address
-// */
+///
+//  The actual IP address
+// /
 typedef struct in_addr IPaddr;
 //    struct in_addr {
 //        unsigned long s_addr; // load with inet_pton()
@@ -49,5 +50,5 @@ private:
     const static string m_postFixS2P;
 };
 
-
+*/
 #endif /* defined(__MessageHierarchyP2P__NotifyDroppedPeerMsg__) */
