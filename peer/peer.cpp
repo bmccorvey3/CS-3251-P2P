@@ -5,8 +5,6 @@
 
 Peer::Peer(std::string server)
 {
-	void buffer[BUFSIZE];
-	void response[BUFSIZE];
 	std::string serverName = server;
 
 	std::queue<std::string> m_messageList;
@@ -39,6 +37,8 @@ Peer::~Peer()
 
 void Peer::receiveFromPeer(int portno){
 	using namespace std;
+	void buffer[BUFSIZE];
+	void response[BUFSIZE];
   //Creation of Socket for this Peer to Listen for Incoming Peer Messages
   struct sockaddr_in this_addr;
   int this_sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -80,6 +80,8 @@ void Peer::receiveFromPeer(int portno){
 
 void Peer::receiveFromServer(){
 	using namespace std;
+	void buffer[BUFSIZE];
+	void response[BUFSIZE];
   //Creation of Socket for this Peer to Listen for Server Updates
   struct sockaddr_in this_addr;
   int this_sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -99,7 +101,7 @@ void Peer::receiveFromServer(){
 
 	  //Receiving from Server
 	  int numBytesRecieved = 0;
-	  while(numBytesReceived += recvfrom(svr_sock, buffer+numBytesReceived, BUFSIZE, 0, (struct sockaddr_in*)&svr_addr, &svr_len)>0){};
+	  while(numBytesReceived += recv(svr_sock, buffer+numBytesReceived, BUFSIZE, 0)>0){};
   	  BaseMsg msg = buffer;
   	  String type = buffer.getType();
   	  String update = "update";
@@ -124,33 +126,54 @@ void Peer::receiveFromServer(){
 
 void Peer::sendtoPeer(){
 	using namespace std;
+	void buffer[BUFSIZE];
+	void response[BUFSIZE];
+	//Timeout Structure
+	struct timeval timeout;
+  	timeout.tv_sec = 120;
+  	timeout.tv_usec == 0;
+
 	//Create Socket on port portno 22222 to send to PRimaryRecipient IPAddr
 	int sock = socket(AF_INET, SOCK_STREAM, 0);
   	struct sockaddr_in addr;
   	addr.sin_family = AF_INET;
   	addr.sin_port = htons(primaryPort);
   	addr.sin_addr = PrimaryRecipient;
+
   	//inet_aton(recipient, &addr.sin_addr.s_addr);
   	connect(sock, (struct sockaddr_in*)&addr,sizeof(addr));
   	memset(buffer, '\0', sizeof(buffer));
   	memset(response, '\0', sizeof(response));
 
-  	bool timeout = true;
+  	//Setsockopt for Timeouts
+
+  	bool timed = false;
+  	if(setsockopt(sock, SOL_SOCKET, SP_SNDTIMEO, (char*)&timeout, sizeof(timeout))<0){
+  	}
+
   	//Send all messages in message Queue
   	while(m_messageList.size > 0){
   		buffer = m_messageList.pop();
-  		while(sendto(sock,buffer, BUFSIZE, 0, (struct sockaddr_in*)&addr, sizeof(addr))){
-  			timeout = false;
+  		while(int value = send(sock,buffer, BUFSIZE, 0)){
+  			if(value == EPIPE){
+  				timed = true;
+  			}
   		}
   	}
+
   	close(sock);
-  	if(timeout){
+  	if(timed){
   		NotifyRecipientDied(PrimaryRecipient);
   	}
 
   	/********************************************************
   	*SecondaryRecipient
   	********************************************************/
+  	//Timeout Struct
+  	struct timeval timeout2;
+  	timeout2.tv_sec = 120;
+  	timeout2.tv_usec == 0;
+
   	//Create Socket on port portno 33333 to send to SecondaryRecipient IPAddr
 	int sock = socket(AF_INET, SOCK_STREAM, 0);
   	struct sockaddr_in addr;
@@ -162,22 +185,32 @@ void Peer::sendtoPeer(){
   	memset(buffer, '\0', sizeof(buffer));
   	memset(response, '\0', sizeof(response));
 
-  	bool timeout = true;
+	//setsockopt for timeout
+	bool timed2 = false;
+  	if(setsockopt(sock, SOL_SOCKET, SP_SNDTIMEO, (char*)&timeout2, sizeof(timeout2))<0){
+  		
+  	}
+
   	//Send all messages in message Queue
   	while(m_messageList.size > 0){
   		buffer = m_messageList.pop();
-  		while(sendto(sock,buffer, BUFSIZE, 0, (struct sockaddr_in*)&addr, sizeof(addr))){
-  			timeout = false;
+  		while(int value =send(sock,buffer, BUFSIZE, 0){
+  			if(value == EPIPE){
+  				timed2=true;
+  			}
   		}
   	}
+
   	close(sock);
-  	if(timeout){
+  	if(timed2){
   		NotifyRecipientDied(SecondaryRecipient);
   	}
 }
 
 void Peer::sendtoServer(){
 	using namespace std;
+	void buffer[BUFSIZE];
+	void response[BUFSIZE];
 	//Create Socket on port 11111 to send UI commands to Server
 	int sock = socket(AF_INET, SOCK_STREAM, 0);
   	addr.sin_family = AF_INET;
@@ -203,7 +236,7 @@ void Peer::sendtoServer(){
 	}
 	else if(strncmp(code, "enter")){
 		buffer = new EnterChatroomMsg(message);
-  		while(sendto(sock,buffer, BUFSIZE, 0, (struct sockaddr_in*)&addr, sizeof(addr))){};	
+  		while(send(sock,buffer, BUFSIZE, 0){};	
 
   		int numBytesRecieved = 0;
 	  	while(numBytesReceived += recvfrom(sock, response+numBytesReceived, BUFSIZE, 0, (struct sockaddr_in*)&svr_addr, &svr_len)>0){};
@@ -212,7 +245,7 @@ void Peer::sendtoServer(){
 	}
 	else if(strncmp(code, "leave")){
 		buffer = new LeaveChatroomMsg();
-  		while(sendto(sock,buffer, BUFSIZE, 0, (struct sockaddr_in*)&addr, sizeof(addr))){};	
+  		while(send(sock,buffer, BUFSIZE, 0){};	
 
   		int numBytesRecieved = 0;
 	  	while(numBytesReceived += recvfrom(sock, response+numBytesReceived, BUFSIZE, 0, (struct sockaddr_in*)&svr_addr, &svr_len)>0){};
@@ -221,7 +254,7 @@ void Peer::sendtoServer(){
 	}
 	else if(strncmp(code, "create")){
 		buffer = new CreateChatroomMsg(message);
-  		while(sendto(sock,buffer, BUFSIZE, 0, (struct sockaddr_in*)&addr, sizeof(addr))){};	
+  		while(send(sock,buffer, BUFSIZE, 0){};	
 
   		int numBytesRecieved = 0;
 	  	while(numBytesReceived += recvfrom(sock, response+numBytesReceived, BUFSIZE, 0, (struct sockaddr_in*)&svr_addr, &svr_len)>0){};
@@ -230,7 +263,7 @@ void Peer::sendtoServer(){
 	}
 	else if(strncmp(code, "destroy")){
 		buffer = new DestroyChatroomMsg(message);
-  		while(sendto(sock,buffer, BUFSIZE, 0, (struct sockaddr_in*)&addr, sizeof(addr))){};	
+  		while(send(sock,buffer, BUFSIZE, 0){};	
 
   		int numBytesRecieved = 0;
 	  	while(numBytesReceived += recvfrom(sock, response+numBytesReceived, BUFSIZE, 0, (struct sockaddr_in*)&svr_addr, &svr_len)>0){};
@@ -248,7 +281,7 @@ void Peer::sendtoServer(){
   	}
 	else if(strncmp(code, "username")){
 		buffer = new ChooseUsernameMsg(message);
-  		while(sendto(sock,buffer, BUFSIZE, 0, (struct sockaddr_in*)&addr, sizeof(addr))){};	
+  		while(send(sock,buffer, BUFSIZE, 0){};	
 
   		int numBytesRecieved = 0;
 	  	while(numBytesReceived += recvfrom(sock, response+numBytesReceived, BUFSIZE, 0, (struct sockaddr_in*)&svr_addr, &svr_len)>0){};
