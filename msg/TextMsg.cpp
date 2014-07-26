@@ -8,11 +8,16 @@
 
 #include "TextMsg.h"
 #define POS_TXT_PREFIX 0 // position of "txt:"
-
-TextMsg::TextMsg(unsigned int length, char* username, unsigned int salt,
-                 char* type, void* payload) : BaseMessage(length,username,salt,
-                                                          type,payload) {}
 const std::string TextMsg::m_prefixStr = "txt:";
+
+TextMsg::TextMsg(std::string username, std::string chatRoomName, std::string payload) : BaseMessage(username,Direction::P2P, chatRoomName)
+{
+    m_textPayload = payload;
+    m_messageType = MessageType::TEXT;
+    m_length = HEADER_LENGTH + sizeof(m_textPayload) + sizeof(m_prefixStr);
+    m_code = "text";
+}
+
 TextMsg::~TextMsg() {}
 
 TextMsg::TextMsg(void* input) : BaseMessage(input){
@@ -31,40 +36,34 @@ TextMsg::TextMsg(void* input) : BaseMessage(input){
     // free textPayload; // TODO do I need this?
 }
 
-//unsigned int TextMsg::getLength() {
-//    return BaseMessage::l;
-//}
-//
-//char* TextMsg::getUsername() {
-//    return BaseMessage::user;
-//}
-//
-//unsigned int TextMsg::getSalt() {
-//    return BaseMessage::salt;
-//}
-//
-//char* TextMsg::getType() {
-//    return BaseMessage::type;
-//}
-
-void* TextMsg::getPayload() {
-    return BaseMessage::payload;
+void* TextMsg::getMessageStruct()
+{
+    StBaseHeader* header = BaseMessage::getHeaderStruct();
+    header->length = m_length;
+    memcpy(&(header->code), &m_code, CODE_LENGTH);
+    const size_t totalPayloadSize =sizeof(m_textPayload)+ sizeof(m_prefixStr);
+    typedef struct FULL_MESSAGE {
+        StBaseHeader stBaseHeader;
+        char payload[totalPayloadSize];
+    } FullMessage;
+    FullMessage* fullMessage = (FullMessage*)malloc(sizeof(FullMessage));
+    memcpy(fullMessage,&header,sizeof(StBaseHeader));
+    std::string tempPayloadStr = m_prefixStr + m_textPayload;
+    const char* tempPayloadStr_cstr = tempPayloadStr.c_str();
+    memcpy(&fullMessage[sizeof(StBaseHeader)], &tempPayloadStr_cstr, totalPayloadSize);
+    free(header);
+    return fullMessage;
+}
+std::string TextMsg::getTextPayload() {
+    return m_textPayload;
 }
 
-Direction TextMsg::getDirection() {
-    return Direction::P2P;
+std::string TextMsg::getPrefixStr() {
+    return m_prefixStr;
 }
 
-std::string TextMsg::getStringFromPayload(void* payload) {
-    std::string *payload_pointer = static_cast<std::string*>(payload);
-    std::string s = *payload_pointer;
-    return s;
-}
-
-std::string TextMsg::getPayloadText() {
-    std::string payload = getStringFromPayload(BaseMessage::payload);
-    unsigned long first = payload.find_last_of(": ");
-    return payload.substr(first+1);
-}
-
-
+//std::string TextMsg::getPayloadText() {
+//    std::string payload = getStringFromPayload(BaseMessage::payload);
+//    unsigned long first = payload.find_last_of(": ");
+//    return payload.substr(first+1);
+//}

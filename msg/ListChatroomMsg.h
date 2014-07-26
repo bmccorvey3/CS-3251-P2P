@@ -12,20 +12,23 @@
 #include <iostream>
 #include "BaseMessage.h"
 
-class ListChatroomMsg : public BaseMessage {
-    public :
-    ListChatroomMsg(unsigned int length, char* username, unsigned int salt,
-            char* type, void* payload);
+class ListChatroomMsg: public BaseMessage {
+public :
+    ListChatroomMsg(Direction dir, string listChatrooms, string payload);
+    ListChatroomMsg(void* input);
     ~ListChatroomMsg(); //TODO delete pointers
-    unsigned int getLength();
-    char* getUsername();
-    unsigned int getSalt();
-    char* getType();
-    void* getPayload();
-    Direction getDirection();
-    std::string getStringFromPayload(void*);
-    std::string getListofChatrooms();
+    
+    void* getMessageStruct();
+    
+    string getListPayload();
+    
+private:
+    string m_listPayload;
+    const static string m_P2S;
+    const static string m_prefixS2P;
+    const static string m_postFixS2P;
 };
+
 
 
 #endif /* defined(__MessageHierarchyP2P__ListChatroomMsg__) */

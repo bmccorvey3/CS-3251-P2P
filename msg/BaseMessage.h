@@ -15,6 +15,9 @@
 #include <stdio.h>
 #include <sstream>
 #include <cstdlib>
+#define USERNAME_LENGTH 16
+#define CHATROOM_NAME_LENGTH 16
+#define CODE_LENGTH 4
 
 using std::string;
 
@@ -69,10 +72,9 @@ typedef struct header_t {
 
 class BaseMessage {
 public:
-    BaseMessage(); // TODO add m_salt = rand();
+//    BaseMessage(); // TODO add m_salt = rand();
     BaseMessage(void* parseMe);
-    BaseMessage(string username, unsigned int salt, Direction dir) :
-                m_username{username}, m_salt{salt}, m_dir{dir} {}
+    BaseMessage(string username, Direction dir, string chatRoomName);
     
     
     
@@ -80,42 +82,36 @@ public:
                             sizeof(char[16]) + sizeof(unsigned int) +
                             sizeof(char[4]) + sizeof(char[16]);
     
-    static const int indexIntoLength = 0;
-    static const int indexIntoUsername = sizeof(unsigned int);
-    static const int indexIntoSalt = indexIntoUsername + sizeof(char[16]);
-    static const int indexIntoType = indexIntoSalt + sizeof(char[4]);
-    static const int indexIntoChatroom = indexIntoType + sizeof(char[4]);
-    static const int indexIntoPayload = indexIntoChatroom + sizeof(char[16]);
     static MessageType convertStringToMessageType(std::string stringType, Direction &direction);
     virtual ~BaseMessage() {
         //TODO add destructor to delete pointers
     }
     
-    virtual void setLength(unsigned int, char[]);
-    virtual void setUsername(string);
-    virtual void setSalt(unsigned int);
-    virtual void setMessageType(MessageType);
-    virtual void setStringType(string);
-    virtual void setDirection(Direction);
-    virtual void setChatroom(string);
-    virtual void setPayload(string);
+    StBaseHeader* getHeaderStruct();
+    
+//    virtual void setUsername(string);
+//    virtual void setSalt(unsigned int);
+//    virtual void setMessageType(MessageType);
+//    virtual void setStringType(string);
+//    virtual void setDirection(Direction);
+//    virtual void setChatroom(string);
+//    virtual void setPayload(string);
     
     unsigned int getLength();
     string getUsername();
-    unsigned int getSalt();
+    //unsigned int getSalt(); Don't need to get the salt
     static MessageType getMessageType(void* input);
-    string getStringType();
+    string getMessageCode();
     Direction getDirection();
-    string getChatroom();
-    string getPayloadString();
-    void* getPayloadPtr();
+    string getChatRoomName();
+    void* getPayloadPtr(); //Make sure these are void pointers
+    //void* getPayloadPtr();
     
-    //virtual std::string getMessage() = 0; //Readable format */
-    
-    // static BaseMessage* parseBaseMessage(void*);
-    void* getMessageStruct();
+    // Get struct to output to socket
+    virtual void* getMessageStruct() = 0;
+    // Print out debug info
     static string log(BaseMessage&);
-    
+    // Get message that can be cast to another kind of message from a void*
     static BaseMessage* getInstance(void*);
     
    // static virtual BaseMessage* getParticularMessage() = 0;

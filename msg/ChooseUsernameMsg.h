@@ -11,32 +11,25 @@
 
 #include <iostream>
 #include "BaseMessage.h"
-#define LENGTH_OF_USERNAME 16
 
 class ChooseUsernameMsg : public BaseMessage {
-    public :
-    //ChooseUsernameMsg(unsigned int length, char* username, unsigned int salt,
-    //        char* type, void* payload);
-    ChooseUsernameMsg(Direction dir, MessageType type, string username);
+public :
+    
+    ChooseUsernameMsg(string username, Direction dir, string payload);
+    ChooseUsernameMsg(void* input);
     ~ChooseUsernameMsg(); //TODO delete pointers
     
-    unsigned int getLength();
-    string getUsername();
-    unsigned int getSalt();
-    string getType();
-    string getPayload();
+    void* getMessageStruct();
+
+    string getChoosePayload();
+    string getPrefixP2S();
+    string getPrefixS2P();
     
-    void parseSpecificMessage(void* msg);
-    
-   // static ChooseUsernameMsg* parseMsg(void* msg);
-    
-    
- //   void* sendMsg();
-    
-   /* Direction getDirection();
-    std::string getStringFromPayload(void*);
-    std::string getUsernameP2S();
-    std::string getUsernameS2P();*/
+private:
+    string m_choosePayload;
+    const static string m_prefixP2S;
+    const static string m_prefixS2P;
+ 
 };
 
 

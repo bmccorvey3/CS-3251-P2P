@@ -17,122 +17,22 @@
 #include "NotifyDroppedPeerMsg.h"
 #include "UpdateRecipientsMsg.h"
 
-
-/*
-
-lvsp
- take in username
- 
- direction constructor. put in direction enum. 
- based on direction, format into a payload
- 
- take out length
- 
- i create the salt. random number
- length, type, salt
- 
- constructor for each message type
- 
- username get from constructor
- 
- i'm creating the payload
- 
- change naming convention to m_
- 
- cast binary data 
- 
- parse message constructor
- 
- chatroom name as arg in every message
- 
- 
- 
- 
- // send
- EnterChatroomMsg msg = new EnterChatroomMsg("Name of Chatroom", "username", P2S);
- TCPconnection.send((void*)msg.getStruct());
- 
- // receive
- ChooseUsernameMsg* msg = ChooseUsernameMsg.parseMsg(TCP.getPayload());
- 
- static ChooseUsernameMsg* ChooseUsernameMsg::parseMsg(void*)
+BaseMessage::BaseMessage(string username, Direction dir, string chatRoomName):
+m_username(username), m_dir(dir), m_chatRoomName(chatRoomName)
 {
-	// parse out all args
-    // pull out header
-    // make sure it’s of type cups (or cusp)
-    // get length
-    // parse from remaining buffer the length indicated in header as payload (in this case, username and some other stuff)
-	return new ChooseUsernameMsg(args);
+    m_salt = rand();
+    // TODO do I need to set direction in child classes?
 }
- 
- 
-*/
 
 BaseMessage::BaseMessage(void* msg)
 {
-    /*malloc size of structure
-     memcpy to the structure
-     
-     */
-    
-//    char* charMsg = (char*) msg;
-//    char username[16];
-//    char type[4];
-//    char chatroom[16];
-//    char payload[1024];
-    // parse through message and construct a BaseMessage with all the member variables filled in
-    // StBaseMessage* stMsg = static_cast<message_t*>(msg);
-    // TODO make these constants somewhere--maybe as #define
-    /*int indexIntoLength = 0;
-    int indexIntoUsername = sizeof(unsigned int);
-    int indexIntoSalt = indexIntoUsername + sizeof(char[16]);
-    int indexIntoType = indexIntoSalt + sizeof(char[4]);
-    int indexIntoChatroom = indexIntoType + sizeof(char[4]);
-    int indexIntoPayload = indexIntoChatroom + sizeof(char[16]);*/
-    // TODO others...
-    
-    // index to get out member variables
-    
-
-//    unsigned int length = (unsigned int) charMsg[BaseMessage::indexIntoLength];
-//    memcpy(username, &charMsg[BaseMessage::indexIntoUsername], sizeof(username));
-//    unsigned int salt = (unsigned int) charMsg[BaseMessage::indexIntoSalt];
-//    memcpy(type, &charMsg[BaseMessage::indexIntoType], sizeof(type));
-//    memcpy(chatroom, &charMsg[BaseMessage::indexIntoChatroom], sizeof(chatroom));
-//    memcpy(payload, &charMsg[BaseMessage::indexIntoPayload], sizeof(payload));
-    
     StBaseHeader* stMsg = (StBaseHeader*) msg;
     m_length = stMsg->length;
-    m_username = stMsg->username;
+    memcpy(&m_username, stMsg->username, USERNAME_LENGTH);
     m_salt = stMsg->salt;
     m_code = stMsg->code;
-    m_chatRoomName = stMsg->chatRoomName;
-    
-    std::string stringType = std::string(m_code);
-    Direction direction = Direction::ERROR;
-    MessageType msg_type = MessageType::MT_ERROR;
-    
-    
-//    BaseMessage* outputMsg = new BaseMessage(username, salt, direction);
-//    
-//    outputMsg->setLength(length, payload); // TODO make function
-//    m_length = 
-//    outputMsg->setUsername(string(username));
-//    outputMsg->setSalt(salt);
-//    outputMsg->setMessageType(msg_type);
-//    outputMsg->setStringType(string(type));
-//    outputMsg->setDirection(direction);
-//    outputMsg->setChatroom(string(chatroom));
-//    outputMsg->setPayload(string(payload));
-//    m_salt = rand();
-    
-   /* string length_msg = str_msg.substr(0,sizeof(header.length));
-    string user_msg = str_msg.substr(4,sizeof(header.username));
-    string salt_msg = str_msg.substr(20,sizeof(header.salt));
-    string type_msg = str_msg.substr(24, sizeof(header.type)); */
-    
-//    return outputMsg;
-    
+    memcpy(&m_code, stMsg->code, CODE_LENGTH);
+    memcpy(&m_chatRoomName, stMsg->chatRoomName, CHATROOM_NAME_LENGTH);
 }
 
 // TODO check scope on this
@@ -206,7 +106,6 @@ MessageType BaseMessage::convertStringToMessageType(std::string stringType, Dire
         fprintf(stderr, "Unknown message type\n");
     }
     return msg_type;
-
 }
 
 BaseMessage* BaseMessage::getInstance(void* input){
@@ -223,65 +122,99 @@ BaseMessage* BaseMessage::getInstance(void* input){
         case TEXT:
             return new TextMsg(input);
             break;
+        case CHOOSE_P2S:
+        case CHOOSE_S2P:
+            return new ChooseUsernameMsg(input); // TODO update constructor
+            break;
+        case CREATE_P2S:
+        case CREATE_S2P:
+        case ERR_CREATE_S2P:
+            return new CreateChatroomMsg(input);
+        case DESTROY_P2S:
+        case DESTROY_S2P:
+        case ERR_DESTROY_S2P:
+            return new DestroyChatroomMsg(input);
+        case ENTER_P2S:
+        case ENTER_S2P:
+        case ERR_ENTER_S2P:
+            return new EnterChatroomMsg(input);
         case LEAVE_P2S:
         case LEAVE_S2P:
             return new LeaveChatroomMsg(input);
-            break;
+        case LIST_P2S:
+        case LIST_S2P:
+            return new ListChatroomMsg(input);
+        case NOTIFY_P2S:
+        case NOTIFY_S2P:
+        case ERR_NOTIFY_S2P:
+            return new NotifyDroppedPeerMsg(input);
+        case UPDATE_P2S:
+        case UPDATE_S2P:
+            return new UpdateRecipientsMsg(input);
+        // TODO add other cases
         default:
+            fprintf(stderr, "Error creating new message!\n");
             break;
     }
 }
 
-message_t* BaseMessage::getMessageStruct() {
-    message_t* retStruct = (message_t*)malloc(sizeof(HEADER_LENGTH) + sizeof(m_payload));
-    StBaseMessage.length = length;
-    
-    
-    
-    memcpy(StBaseMessage.username, m_username.c_str(), sizeof(StBaseMessage.username));
-    //Buffer username with null bytes
-    if(strlen(StBaseMessage.username) < 16) {
-        memset(StBaseMessage.username + strlen(m_username.c_str()), '0',
-               16 - strlen(m_username.c_str()));
-    }
-    
-    
-    StBaseMessage.salt = m_salt;
-    memcpy(StBaseMessage.type, m_string_type.c_str(), sizeof(StBaseMessage.type));
-    
-    memcpy(StBaseMessage.chatroom, m_chatRoomName.c_str(), sizeof(StBaseMessage.chatroom));
-    //Buffer chatroom with null bytes
-    if(strlen(StBaseMessage.chatroom) < 16) {
-        memset(StBaseMessage.chatroom + strlen(m_chatRoomName.c_str()), '0',
-               16 - strlen(m_chatRoomName.c_str()));
-    }
-    
-    
-    memcpy(StBaseMessage.payload, m_payload.c_str(), sizeof(StBaseMessage.payload));
-    
-    memcpy(retStruct, &StBaseMessage, sizeof(&retStruct));
-    return retStruct;
-    
-}
-
-static string log(BaseMessage& msg) {
-    std::stringstream ss;
-    ss << "The length is: " << msg.getLength() << std::endl;
-    ss << "The username is: " << msg.getUsername() << std::endl;
-    ss << "The salt is: " << msg.getSalt() << std::endl;
-    ss << "The message type is: " << msg.getMessageType() << std::endl;
-    ss << "The string type is: " << msg.getStringType() << std::endl;
-    ss << "The direction is: " << static_cast<int>(msg.getDirection()) << std::endl;
-    ss << "The chatroom name is: " << msg.getChatroom() << std::endl;
-    ss << "The payload is: " << msg.getPayloadString() << std::endl;
-    return ss.str();
-}
-
-//void BaseMessage::setLength(unsigned int l, char[]) {
-//    m_length = l;
+//message_t* BaseMessage::getMessageStruct() {
+//    message_t* retStruct = (message_t*)malloc(sizeof(HEADER_LENGTH) + sizeof(m_payload));
+//    StBaseMessage.length = length;
 //    
-//    //TODO didn't set length of total message
+//    
+//    
+//    memcpy(StBaseMessage.username, m_username.c_str(), sizeof(StBaseMessage.username));
+//    //Buffer username with null bytes
+//    if(strlen(StBaseMessage.username) < 16) {
+//        memset(StBaseMessage.username + strlen(m_username.c_str()), '0',
+//               16 - strlen(m_username.c_str()));
+//    }
+//    
+//    
+//    StBaseMessage.salt = m_salt;
+//    memcpy(StBaseMessage.type, m_string_type.c_str(), sizeof(StBaseMessage.type));
+//    
+//    memcpy(StBaseMessage.chatroom, m_chatRoomName.c_str(), sizeof(StBaseMessage.chatroom));
+//    //Buffer chatroom with null bytes
+//    if(strlen(StBaseMessage.chatroom) < 16) {
+//        memset(StBaseMessage.chatroom + strlen(m_chatRoomName.c_str()), '0',
+//               16 - strlen(m_chatRoomName.c_str()));
+//    }
+//    
+//    
+//    memcpy(StBaseMessage.payload, m_payload.c_str(), sizeof(StBaseMessage.payload));
+//    
+//    memcpy(retStruct, &StBaseMessage, sizeof(&retStruct));
+//    return retStruct;
+//    
 //}
+
+//static string log(BaseMessage& msg) {
+//    std::stringstream ss;
+//    ss << "The length is: " << msg.getLength() << std::endl;
+//    ss << "The username is: " << msg.getUsername() << std::endl;
+//    ss << "The salt is: " << msg.getSalt() << std::endl;
+//    ss << "The message type is: " << msg.getMessageType() << std::endl;
+//    ss << "The string type is: " << msg.getStringType() << std::endl;
+//    ss << "The direction is: " << static_cast<int>(msg.getDirection()) << std::endl;
+//    ss << "The chatroom name is: " << msg.getChatroom() << std::endl;
+//    ss << "The payload is: " << msg.getPayloadString() << std::endl;
+//    return ss.str();
+//}
+
+StBaseHeader* BaseMessage::getHeaderStruct(){
+    StBaseHeader* retStruct = (StBaseHeader*) malloc(sizeof(HEADER_LENGTH));
+    memset((void*)retStruct, 0, sizeof(retStruct)); // ensures extra 0s for char[]s
+    // TODO set length in children classes
+    const char* tempUsername = m_username.c_str();
+    memcpy(&(retStruct->username), &tempUsername, m_username.size());
+    retStruct->salt = m_salt;
+    // TODO set code in children classes
+    const char* tempChatRoomName = m_chatRoomName.c_str();
+    memcpy(&(retStruct->chatRoomName), &tempChatRoomName, m_chatRoomName.size());
+}
+
 //
 //void BaseMessage::setUsername(string username) {
 //    m_username = username;
@@ -311,13 +244,13 @@ static string log(BaseMessage& msg) {
 //    m_payload = payload;
 //}
 //
-//unsigned int BaseMessage::getLength() {
-//    return m_length;
-//}
+unsigned int BaseMessage::getLength() {
+    return m_length;
+}
 //
-//string BaseMessage::getUsername() {
-//    return m_username;
-//}
+string BaseMessage::getUsername() {
+    return m_username;
+}
 //
 //unsigned int BaseMessage::getSalt() {
 //    return m_salt;
@@ -329,23 +262,24 @@ MessageType BaseMessage::getMessageType(void* input) {
     Direction dir;
     return convertStringToMessageType(msgType, dir);
 }
-//
-//string BaseMessage::getStringType() {
-//    return m_string_type;
-//}
-//
-//Direction BaseMessage::getDirection() {
-//    return m_dir;
-//}
-//
-//string BaseMessage::getChatroom() {
-//    return m_chatRoomName;
-//}
-//
-//string BaseMessage::getPayloadString() {
-//    return m_payload;
-//}
-//
+
+
+string BaseMessage::getMessageCode() {
+    return m_code;
+}
+
+Direction BaseMessage::getDirection() {
+    return m_dir;
+}
+
+string BaseMessage::getChatRoomName() {
+    return m_chatRoomName;
+}
+
+void* BaseMessage::getPayloadPtr() {
+    return m_payload;
+}
+
 //void* BaseMessage::getPayloadPtr() {
 //    return static_cast<void*>(&m_payload);
 //}

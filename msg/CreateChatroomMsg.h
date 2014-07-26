@@ -14,24 +14,22 @@
 
 class CreateChatroomMsg : public BaseMessage {
 public :
-    //CreateChatroomMsg(unsigned int length, char* username, unsigned int salt,
-     //       char* type, void* payload);
-    CreateChatroomMsg(Direction dir, MessageType type, string chatRoomName);
+    CreateChatroomMsg(string username, Direction dir, string chatRoomName, string payload);
+    CreateChatroomMsg(void* input);
     ~CreateChatroomMsg(); //TODO delete pointers
-    unsigned int getLength();
-    string getUsername();
-    unsigned int getSalt();
-    string getType();
-    string getPayload();
     
-    void parseSpecificMessage(void* msg);
+    void* getMessageStruct();
     
-    /*
-    Direction getDirection();
-    std::string getStringFromPayload(void*);
-    std::string getChatRoomFromPayloadP2S();
-    std::string getChatRoomFromPayloadS2P();
-    */
+    string getChoosePayload();
+    
+private:
+    string m_createPayload;
+    const static string m_prefixP2S;
+    const static string m_prefixS2P;
+    const static string m_prefixS2P_ERR;
+    const static string m_postfixP2S;
+    const static string m_postFixS2P;
+    const static string m_postfixS2P_ERR;
 };
 
 
