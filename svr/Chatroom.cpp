@@ -17,11 +17,12 @@ std::string Chatroom::getName()
     return m_name;
 }
 
-void Chatroom::updatePeerUsername(IPaddrStruct* IPaddr, std::string username)
+void Chatroom::updatePeerUsername(IPaddrStruct* ipAddr, std::string& username)
 {
     for (std::list<Peer>::iterator it=m_peers.begin(); it != m_peers.end(); ++it)
     {
-        if (strcmp(it->getIPaddr()), IPaddr)){
+    	// if this is the username we're looking for
+        if (it->getIPaddr()->sin_addr.s_addr == ipAddr->sin_addr.s_addr){
             it->setUsername(username);
             return;
         }
@@ -31,27 +32,28 @@ void Chatroom::updatePeerUsername(IPaddrStruct* IPaddr, std::string username)
     #endif // DEBUG_SERVER
 }
 
-int Chatroom::dropPeer(IPaddrStruct* IPaddr)
+int Chatroom::removePeer(IPaddrStruct* ipAddr)
 {
     int indexRemoved = 0;
     for (std::list<Peer>::iterator it=m_peers.begin(); it != m_peers.end(); ++it)
     {
-        if (strcmp(it->getIPaddr()), IPaddr)){
+        if (it->getIPaddr()->sin_addr.s_addr == ipAddr){
             m_peers.erase(it);
             return indexRemoved;
         } else {
             indexRemoved++;
         }
-        #ifdef DEBUG_SERVER
-        fprintf(stderr, "Couldn't remove peer at IPaddr %d", IPaddr->IPaddr);
-        #endif // DEBUG_SERVER
-        return -1;
     }
+	#ifdef DEBUG_SERVER
+	fprintf(stderr, "Couldn't remove peer at IPaddr %d", ipAddr->sin_addr.s_addr);
+	#endif // DEBUG_SERVER
+	return -1;
 }
 
-Chatroom::UpdateRecipientStruct* Chatroom::getUpdateStruct(indexRemoved)
+UpdateRecipientStruct* Chatroom::getUpdateStruct(int indexRemoved)
 {
-    UpdateRecipientStruct* newRecipients = calloc(sizeof(UpdateRecipientStruct));
+    UpdateRecipientStruct* newRecipients = malloc(sizeof(UpdateRecipientStruct));
+    memset(newRecipients, 0, sizeof(UpdateRecipientStruct));
     // newRecipients->firstPeerPrimaryRecipient;
     // -2--> -1, 0
     // -1--> 0, 1
@@ -59,7 +61,7 @@ Chatroom::UpdateRecipientStruct* Chatroom::getUpdateStruct(indexRemoved)
     IPaddrStruct* IPs[4];
     int length = (int) m_peers.size();
     // calculate the indexes of the values of which I'm interested
-    for (int i = -2, i < 2; i++){
+    for (int i = -2; i < 2; i++){
         int peerIndex = positiveMod(i,length);
         indexArr[i+2] = peerIndex;
     }
@@ -92,12 +94,13 @@ int Chatroom::positiveMod(int num, int mod)
 //    int len = 6;
 //	int removed = 0;
 //	int offset = -1;
-	int num = removed + offset;
+//	int num = removed + offset;
 	if (num < 0){
 		num += mod;
 	} else if (num > mod-1){
 		num -=mod;
 	}
+	return num;
 }
 
 int Chatroom::getSize()
