@@ -34,6 +34,8 @@ LeaveChatroomMsg::LeaveChatroomMsg(string username, Direction dir, string chatRo
 LeaveChatroomMsg::~LeaveChatroomMsg() {}
 
 LeaveChatroomMsg::LeaveChatroomMsg(void* input) : BaseMessage(input) {
+	// Don't need this since it's a sanity check
+
 //    char* chatRoomPayload = (char*) malloc(m_length);
 //    memcpy(chatRoomPayload, &((char*)input)[HEADER_LENGTH], m_length);
 //    std::string tempchatRoomPayload(chatRoomPayload);
@@ -55,6 +57,7 @@ LeaveChatroomMsg::LeaveChatroomMsg(void* input) : BaseMessage(input) {
 //        // TODO add log information
 //    }
 //    // free choosePayload; // TODO do I need this?
+
 }
 
 void* LeaveChatroomMsg::getMessageStruct() {

@@ -47,7 +47,7 @@ void Server::monitor() {
 	{
 		memset(&buffer, 0, sizeof(buffer)); // clear the buffer
 		bool foundRequestEnd = false;
-		do {
+		//do {
 			int numBytesRecv = 0;
 			// accept any client
 			cli_sock = accept(svr_sock, NULL, NULL);
@@ -68,28 +68,17 @@ void Server::monitor() {
 #ifdef DEBUG_SERVER
 				printf("\"%s\"\n", buffer);
 #endif
-				// TODO find whether we've received the whole packet or whether we should wait for more
-//                bool receivedFullPacket = false;
-//                BaseMessage* msg;
-//                if (numBytesRecv > BaseMessage::HEADER_LENGTH){
-//                	msg = BaseMessage(buffer);
-//                	if (numBytesRecv > msg->getLength()){
-//                		receivedFullPacket = true;
-//                	} else {
-//#ifdef DEBUG_SERVER
-//                		fprintf(stderr, "Didn't receive full packet; trying again\n");
-//#endif
-//                	}
-//                }
-//                if (receivedFullPacket) // TODO set this variable
-//                {
 				// we got to the end of the request
 				foundRequestEnd = true; // break out at the end of the loop
 				BaseMessage* msg = BaseMessage::getInstance(buffer);
 				respondToRequest(msg, cli_sock);
 //                } // if receivedFullPacket
 			} // if numBytesRecv > 0
-		} while (!foundRequestEnd);
+			else {
+				// if you couldn't receive, close the connection
+				close(cli_sock);
+			}
+		//} while (!foundRequestEnd);
 		// at this point, you may loop around to attend to other clients
 	} // while(1)
 	close(svr_sock); // close the server when you're completely done

@@ -12,8 +12,6 @@
 #include <iostream>
 #include "BaseMessage.h"
 
-/*
-
 typedef struct sockaddr_in IPaddrStruct;
 //    struct sockaddr_in {
 //        short            sin_family;   // e.g. AF_INET, AF_INET6
@@ -33,22 +31,27 @@ typedef struct in_addr IPaddr;
 
 class UpdateRecipientsMsg: public BaseMessage {
     public :
-    UpdateRecipientsMsg(Direction dir, IPaddrStruct ip_struct, string payload);
+    UpdateRecipientsMsg(std::string username, Direction dir,
+        		std::string chatRoomName, IPaddrStruct* ipAddr1, IPaddrStruct* ipAddr2);
     UpdateRecipientsMsg(void* input);
     ~UpdateRecipientsMsg(); //TODO delete pointers
     
     void* getMessageStruct();
     
     string getUpdatePayload();
+    IPaddrStruct* getIPaddr1();
+    IPaddrStruct* getIPaddr2();
     
+    static std::string getIPaddrString(IPaddrStruct* ipAddr);
+    static std::string getPortString(IPaddrStruct* ipAddr);
 private:
     string m_updatePayload;
     const static string m_P2S;
     const static string m_prefixS2P;
     const static string m_midfixS2P;
     const static string m_postFixS2P;
+    std::string m_ipAddr1;
+    std::string m_ipAddr2;
 };
- 
- */
 
 #endif /* defined(__MessageHierarchyP2P__UpdateRecipientsMsg__) */

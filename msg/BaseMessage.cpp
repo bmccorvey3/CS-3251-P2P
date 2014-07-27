@@ -25,7 +25,6 @@ BaseMessage::BaseMessage(string username, Direction dir, string chatRoomName):
 m_username(username), m_dir(dir), m_chatRoomName(chatRoomName)
 {
     m_salt = rand();
-    // TODO do I need to set direction in child classes?
 }
 
 /*
@@ -41,6 +40,7 @@ BaseMessage::BaseMessage(void* msg)
     memcpy(&m_code, stMsg->code, CODE_LENGTH);
     memcpy(&m_chatRoomName, stMsg->chatRoomName, CHATROOM_NAME_LENGTH);
     m_payload = (void*)&(((char*)msg)[HEADER_LENGTH]);
+    m_messageType = convertStringToMessageType(m_code, m_dir);
 }
 
 // TODO check scope on this
@@ -323,6 +323,6 @@ void* BaseMessage::getPayloadPtr() {
     return m_payload;
 }
 
-//void* BaseMessage::getPayloadPtr() {
-//    return static_cast<void*>(&m_payload);
-//}
+MessageType BaseMessage::getMessageType(){
+	return m_messageType;
+}

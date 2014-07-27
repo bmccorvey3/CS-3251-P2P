@@ -103,6 +103,7 @@ public:
     string getUsername();
     //unsigned int getSalt(); Don't need to get the salt
     static MessageType getMessageType(void* input);
+    MessageType getMessageType();
     string getMessageCode();
     Direction getDirection();
     string getChatRoomName();

@@ -2,6 +2,7 @@ MessageHierarchyP2P/
 .cproject
 .project
 .settings
+<<<<<<< HEAD
 MessageHierarchyP2P/*
 /MessageHierarchyP2P.xcodeproj/*
 MessageHierarchyP2P/MessageHierarchyP2P.xcodeproj/project.xcworkspace/xcuserdata/brent.xcuserdatad/UserInterfaceState.xcuserstate
@@ -10,7 +11,10 @@ TestingMessage/
 MessageHierarchyP2P/
 *.xcuserstate
 *.xcbkptlist
+MessageHierarchyP2P/
+=======
 TestingMessage/
 *.xcuserstate
 *.xcbkptlist
 .gitignore~
+>>>>>>> server

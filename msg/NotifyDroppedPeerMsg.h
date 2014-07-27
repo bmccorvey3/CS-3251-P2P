@@ -11,7 +11,6 @@
 
 #include <iostream>
 #include "BaseMessage.h"
-/*
 
 typedef struct sockaddr_in IPaddrStruct;
 //   struct sockaddr_in {
@@ -32,7 +31,8 @@ typedef struct in_addr IPaddr;
 
 class NotifyDroppedPeerMsg: public BaseMessage {
 public :
-    NotifyDroppedPeerMsg(Direction dir, IPaddrStruct ip_struct, string payload);
+    NotifyDroppedPeerMsg(std::string username, Direction dir,
+    		std::string chatRoomName, IPaddrStruct* ipAddrOfInterest);
     NotifyDroppedPeerMsg(void* input);
     ~NotifyDroppedPeerMsg(); //TODO delete pointers
     
@@ -40,15 +40,19 @@ public :
     
     string getNotifyPayload();
     
+    static std::string getIPaddrString(IPaddrStruct* ipAddr);
+    static std::string getPortString(IPaddrStruct* ipAddr);
+    IPaddrStruct* getDroppedPeerIPaddr();
+    IPaddrStruct* getIPaddrFromStr(std::string inputIp)
 private:
     string m_notifyPayload;
-    const static string m_prefixP2S;
-    const static string m_prefixS2P;
-    const static string m_midfixP2S;
-    const static string m_S2P_ERR;
-    const static string m_postfixP2S;
-    const static string m_postFixS2P;
+    const static std::string m_prefixP2S;
+    const static std::string m_prefixS2P;
+    const static std::string m_midfixP2S;
+    const static std::string m_S2P_ERR;
+    const static std::string m_postfixP2S;
+    const static std::string m_postFixS2P;
+    std::string m_droppedPeer;
 };
 
-*/
 #endif /* defined(__MessageHierarchyP2P__NotifyDroppedPeerMsg__) */

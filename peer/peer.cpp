@@ -94,7 +94,7 @@ void Peer::receiveFromPeers(int portno){
   	  pthread_cond_broadcast(&messagesToSend);
   	  pthread_mutex_unlock(&messageMutex);
   	  //Message displayed to stdout
-  	cout << msg->getTextPayload()<<std::endl;
+  	cout << msg->getPayloadString()<<std::endl;
   }
   close(this_sock);
   close(sender_sock);
@@ -136,7 +136,7 @@ void Peer::receiveFromServer(){
     		sockaddr_in *new2 =update->getIPaddr2();
 
     		updateRecipients(new1, new2);
-    		cout << update->getPayloadString()<<endl;
+    		cout << update->getPayloadString() << std::endl;
 
     		response = (void*) msg->getMessageStruct();
     		while(send(svr_sock, response, BUFSIZE,0));

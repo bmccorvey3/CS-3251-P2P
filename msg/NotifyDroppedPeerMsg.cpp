@@ -7,76 +7,92 @@
 //
 
 #include "NotifyDroppedPeerMsg.h"
-/*
-NotifyDroppedPeerMsg::NotifyDroppedPeerMsg(unsigned int length, char* username,
-                                           unsigned int salt,char* type,
-                                           void* payload) :
-                                            BaseMessage(length,username,salt,
-                                                        type,payload) {}
+#include <arpa/inet.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+
+const string NotifyDroppedPeerMsg::m_prefixP2S = "Peer ";
+const string NotifyDroppedPeerMsg::m_midfixP2S = ":";
+const string NotifyDroppedPeerMsg::m_postfixP2S = " dropped.";
+const string NotifyDroppedPeerMsg::m_prefixS2P = "Removing peer ";
+const string NotifyDroppedPeerMsg::m_postFixS2P = ".";
+const string NotifyDroppedPeerMsg::m_S2P_ERR = "You have been knocked off.";
+
+NotifyDroppedPeerMsg::NotifyDroppedPeerMsg(std::string username, Direction dir,
+		std::string chatRoomName, IPaddrStruct* ipAddrOfInterest) :
+		BaseMessage(username, dir, chatRoomName) {
+	std::string ipAddr = getIPaddrString(ipAddrOfInterest);
+	std::string port = getPortString(ipAddrOfInterest);
+	m_droppedPeer = ipAddr + ":" + port;
+	if (dir == Direction::P2S){
+		// "Peer " + IP address + ":" portNumber + " dropped."
+		m_messageType = MessageType::NOTIFY_P2S;
+		m_code = "pdps";
+		m_length = HEADER_LENGTH + sizeof(m_prefixP2S) + sizeof(m_midfixP2S) + sizeof(m_postfixP2S)
+				+ ipAddr.length() + port.length();
+	} else if (dir == Direction::S2P){
+		// "Removing peer " + IP address + "."
+		m_messageType = MessageType::NOTIFY_S2P;
+		m_code = "pdsp";
+		m_length = HEADER_LENGTH + sizeof(m_prefixS2P) + sizeof(m_postFixS2P) + ipAddr.length();
+	} else if (dir == Direction::ERROR) {
+		// "You have been knocked off."
+		m_messageType = MessageType::NOTIFY_S2P;
+		m_code = "pksp";
+		m_length = HEADER_LENGTH + sizeof(m_S2P_ERR);
+	} else {
+		fprintf(stderr, "Invalid direction in creating NotifyDroppedPeerMsg");
+	}
+}
+
+NotifyDroppedPeerMsg::NotifyDroppedPeerMsg(void* input) : BaseMessage(input){
+	if (m_dir == Direction::P2S){
+			// "Peer " + IP address + ":" portNumber + " dropped."
+		m_droppedPeer = m_payloadString.substr(sizeof(m_prefixS2P));
+	} else if (m_dir == Direction::S2P){
+		// "Removing peer " + IP address + "."
+		m_droppedPeer = m_payloadString.substr(sizeof(m_prefixS2P));
+	} else if (m_dir == Direction::ERROR) {
+		// "You have been knocked off."
+		m_droppedPeer = "";
+	} else {
+		fprintf(stderr, "Invalid direction in creating NotifyDroppedPeerMsg");
+	}
+}
 
 NotifyDroppedPeerMsg::~NotifyDroppedPeerMsg() {}
 
-unsigned int NotifyDroppedPeerMsg::getLength() {
-    return BaseMessage::l;
+IPaddrStruct* NotifyDroppedPeerMsg::getDroppedPeerIPaddr(){
+	return getIPaddrFromStr(m_droppedPeer);
 }
 
-char* NotifyDroppedPeerMsg::getUsername() {
-    return BaseMessage::user;
+std::string NotifyDroppedPeerMsg::getIPaddrString(IPaddrStruct* ipAddr){
+	unsigned long actualIP = ntohl(ipAddr->sin_addr.s_addr);
+	std::stringstream ss;
+	ss << int((actualIP&0xFF000000)>>24) << "."
+		<< int((actualIP&0xFF0000)>>16) << "."
+		<< int((actualIP&0xFF00)>>8) << "."
+		<< int(actualIP&0xFF);
+	return ss.str();
 }
 
-unsigned int NotifyDroppedPeerMsg::getSalt() {
-    return BaseMessage::salt;
+std::string NotifyDroppedPeerMsg::getPortString(IPaddrStruct* ipAddr){
+	unsigned short actualPort = ntohs(ipAddr->sin_port);
+	std::stringstream ss;
+	ss << actualPort;
+	return ss.str();
 }
 
-char* NotifyDroppedPeerMsg::getType() {
-    return BaseMessage::type;
+IPaddrStruct* NotifyDroppedPeerMsg::getIPaddrFromStr(std::string inputIp){
+	int posOfColon = inputIp.find(":");
+	std::string actualIPstr = inputIp.substr(0,posOfColon-1);
+	IPaddrStruct* ipAddr = malloc(sizeof(IPaddr));
+	memset(ipAddr, 0 ,sizeof(ipAddr));
+	inet_pton(AF_INET, inputIp.c_str(), &(ipAddr->sin_addr));
+	ipAddr->sin_family = AF_INET;
+	if (inputIp.length() > posOfColon && posOfColon != std::string::npos){
+		std::string actualPort = inputIp.substr(posOfColon+1);
+			ipAddr->sin_port = atoi(actualPort.c_str());
+	}
+	return ipAddr;
 }
-
-void* NotifyDroppedPeerMsg::getPayload() {
-    return BaseMessage::payload;
-}
-
-Direction NotifyDroppedPeerMsg::getDirection() {
-    Direction dir = Direction::ERROR;
-    char peerServer[] = "pdsp";
-    char serverPeer[] = "pdsp";
-    char serverPeer2[] = "pksp";
-    for(int i = 0; i<(sizeof(BaseMessage::type)/BaseMessage::type[0]); ++i) {
-        if(peerServer[i] == *(BaseMessage::type + i)) {
-            dir = Direction::P2S;
-        }
-        else if(serverPeer[i] == *(BaseMessage::type + i) ||
-                serverPeer2[i] == *(BaseMessage::type + i)) {
-            dir = Direction::S2P;
-        }
-    }
-    return dir;
-}
-
-std::string NotifyDroppedPeerMsg::getStringFromPayload(void* payload) {
-    std::string *payload_pointer = static_cast<std::string*>(payload);
-    std::string s = *payload_pointer;
-    return s;
-}
-
-std::string NotifyDroppedPeerMsg::getDroppedIpP2S() {
-    std::string dropped = getStringFromPayload(BaseMessage::payload);
-    unsigned long last = dropped.find_last_of("Peer ");
-    unsigned long first = dropped.find_first_of(":");
-    return dropped.substr(last+1,first-last-1);
-}
-
-std::string NotifyDroppedPeerMsg::getDroppedIpS2P() {
-    std::string dropped = getStringFromPayload(BaseMessage::payload);
-    unsigned long last = dropped.find_last_of("Removing peer ");
-    unsigned long first = dropped.find_first_of(".");
-    return dropped.substr(last+1,first-last-1);
-}
-
-std::string NotifyDroppedPeerMsg::getDroppedPortP2S() {
-    std::string port = getStringFromPayload(BaseMessage::payload);
-    unsigned long last = port.find_last_of(":");
-    unsigned long first = port.find_first_of(" dropped");
-    return port.substr(last+1,first-last-1);
-}
-*/
