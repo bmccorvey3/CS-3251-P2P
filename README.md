@@ -23,3 +23,35 @@ Finally, there is are connections from the current peer sending data to the two 
 From the messages queue'd from previous peers and the UI, this connection pops evry available message out of the queue and sends it to the two recipient peers.
 
 The peer can make the server: Let the peer enter a chatroom, Let the peer leave a chatroom, Let the peer create a chatroom that doesn't already exist, Let the peer destroy an empty chatroom, Let the peer know a list of all available chatrooms, Let the peer create a username for itself, Let the peer tell the server if another peer dropped connection, and let the peer know all of the previous commands.
+
+
+MESSAGE
+
+The message hierarchy is how peer and server communicate. These messages can either be interpreted as void* input or as standard input already available to the peer. 
+
+Examples on how to create messages:
+BaseMessage(void* input)
+BaseMessage(string username, Direction dir, string chatRoomName, etc.)
+
+The various message formats are in each of the individual files. 
+BaseMessage is the base class and all other classes are derived classes of this base class. 
+
+
+SERVER
+
+/*Talk about server if necessary*/
+
+
+
+WHAT WE COMPLETED
+
+We implemented all the required work but the difficult part was getting each class to mesh together. All of the logic from our RFC is present and everything theoretically should work, but unfortunately due to the time constraints and the already massive amount of work put in, we were unable to complete the project. Nevertheless, partial credit would be greatly appreciated. 
+
+Everything compiles in Eclipse. We didn't test the MakeFile even though we made one. 
+
+
+CHANGES FROM THE RFC
+
+1. Changed message payload to char buffer of max_size = 1024 bytes
+2. Chatroom is in header (max 16 chars)
+3. Seperate Ports to listen to based on whether the message is from the Server or from either of the Two Recipients (Port 22222, 33333) or the Server (Port 11111) to avoid any overlap in socket listening.
