@@ -7,13 +7,14 @@ Peer::Peer(char *server)
 {
 	std::string serverName(server);
 
-	std::queue<std::string> m_messageList; //messageMutex
-	std::vector<std::string> m_messageHashes; //hashMutex
+	std::queue<std::string> m_messageList;
+	std::vector<std::string> m_messageHashes;
 
 	std::string m_username = NULL;
 	std::string m_myChatroom = NULL;
 
-	IPaddr primaryRecipient; //recipientMutex
+	//Recipient IPaddrs
+	IPaddr primaryRecipient;
 	IPaddr secondaryRecipient;
 
 	static pthread_mutex_t messageMutex; //Access by receivieFromPeers,sendToServer,sendToPeers
@@ -23,13 +24,11 @@ Peer::Peer(char *server)
 
 	static pthread_mutex_t recipientMutex; //Access by receiveFromServer,sendToPeers
 
-	pthread_mutex_init(&messageMutex, NULL);
-	pthread_cond_init(&messagesToSend, NULL);
 }
 
 Peer::~Peer()
 {
-	delete std::string serverName; //Use std::string serverName(server) to get std::string of server
+	delete std::string serverName;
 
 	delete std::queue<TextMsg> m_messageList;
 	delete std::vector<std::string> m_messageHashes;
@@ -94,6 +93,7 @@ void Peer::receiveFromPeers(int portno){
   	m_messageList.push(*msg);
   	  pthread_cond_broadcast(&messagesToSend);
   	  pthread_mutex_unlock(&messageMutex);
+  	  //Message displayed to stdout
   	cout << msg->getTextPayload();
   }
   close(this_sock);
@@ -149,6 +149,7 @@ void Peer::receiveFromServer(){
     		cout << update->getPayloadString();
     	}
     	else{
+    	//Server sent a message not to update or drop peer
     		cout << "Received invalid server message";
     	}
   }
@@ -211,7 +212,7 @@ void Peer::sendToPeers(){
 
 	}
 
-  	//Send all messages in message Queue
+  	//Send all messages in message Queue to both socket/recipients
 	pthread_mutex_lock(&messageMutex);
 	pthread_cond_wait(&messagesToSend, &messageMutex);
   	while(m_messageList.size > 0){
@@ -221,6 +222,7 @@ void Peer::sendToPeers(){
   		buffer2 = txtMsg.getMessageStruct();
   		int bytesRecv1=0;
   		while(bytesRecv1+=send(sock,buffer, BUFSIZE, 0)){
+  			//timeout if socket breaks
   			if(errno == EPIPE){
   				timed = true;
   				break;
@@ -228,11 +230,13 @@ void Peer::sendToPeers(){
   		}
   			int bytesRecv2=0;
 			while(bytesRecv2+=send(sock,buffer2, BUFSIZE, 0)){
+				//timeout if socket breaks
 				if(errno == EPIPE){
 				  timed2=true;
 				  break;
 				}
 			}
+			//timeouts if no bytes were sent
   		if(bytesRecv1 == 0){
   			timed = true;
   		}
@@ -242,6 +246,7 @@ void Peer::sendToPeers(){
   	}
 	pthread_mutex_unlock(&messageMutex);
 
+	//calls function to tell server of dropped peer
   	close(sock);
   	if(timed){
   		notifyRecipientDied(&primaryRecipient);
@@ -276,10 +281,12 @@ void Peer::enter(std::string message){
 
 
 	int sock = createSocketToServer();
+	//Create enter message for server
 	EnterChatroomMsg outputMsg = EnterChatroomMsg(m_username, Direction::P2S, message);
 	buffer = outputMsg.getMessageStruct();
 	while(send(sock,buffer, BUFSIZE, 0)){};
 
+	//Receive server response to entering chatroom
 	int numBytesReceived = 0;
 	while(numBytesReceived += recv(sock, response+numBytesReceived, BUFSIZE, 0)){};
 
@@ -296,10 +303,12 @@ void Peer::leave(){
 	memset(response, '\0', sizeof(response));
 
 	int sock = createSocketToServer();
+	//Create leave message for server
 	LeaveChatroomMsg outputMsg = LeaveChatroomMsg(m_username, Direction::P2S, m_myChatroom);
 	buffer = outputMsg.getMessageStruct();
 	while(send(sock,buffer, BUFSIZE, 0)){};
 
+	//Receive server response to leaving chatroom
 	int numBytesReceived = 0;
 	while(numBytesReceived += recv(sock, response+numBytesReceived, BUFSIZE, 0)){};
 
@@ -316,10 +325,12 @@ void Peer::create(std::string chatroomName){
 	memset(response, '\0', sizeof(response));
 
 	int sock = createSocketToServer();
+	//Create create response for server
 	CreateChatroomMsg outputMsg = CreateChatroomMsg(m_username, Direction::P2S, chatroomName);
 	buffer = outputMsg.getMessageStruct();
 	while(send(sock,buffer, BUFSIZE, 0)){};
 
+	//Receive server response to creating chatroom
 	int numBytesReceived = 0;
 	while(numBytesReceived += recv(sock, response+numBytesReceived, BUFSIZE, 0)){};
 
@@ -334,11 +345,13 @@ void Peer::destroy(std::string chatroomName){
 	memset(buffer, '\0', sizeof(buffer));
 	memset(response, '\0', sizeof(response));
 
+	//Create destroy message for server
 	int sock = createSocketToServer();
 	DestroyChatroomMsg outputMsg = DestroyChatroomMsg(m_username, Direction::P2S, chatroomName);
 	buffer = outputMsg.getMessageStruct();
 	while(send(sock,buffer, BUFSIZE, 0)){};
 
+	//Receive server response to destroying chatroom
 	int numBytesReceived = 0;
 	while(numBytesReceived += recv(sock, response+numBytesReceived, BUFSIZE, 0)){};
 
@@ -354,10 +367,12 @@ void Peer::user(std::string message){
 	memset(response, '\0', sizeof(response));
 
 	int sock = createSocketToServer();
+	//create username request for server
 	ChooseUsernameMsg outputMsg = ChooseUsernameMsg(message, Direction::P2S);
 	buffer = outputMsg.getMessageStruct();
 	while(send(sock,buffer, BUFSIZE, 0)){};
 
+	//Receive server response to user creation
 	int numBytesReceived = 0;
 	while(numBytesReceived += recv(sock, response+numBytesReceived, BUFSIZE, 0)){};
 
@@ -374,10 +389,12 @@ void Peer::list(){
 	memset(response, '\0', sizeof(response));
 
 	int sock = createSocketToServer();
+	//Create list request for server
 	ListChatroomMsg outputMsg = ListChatroomMsg(Direction::P2S, NULL);
 	buffer = outputMsg.getMessageStruct();
 	while(send(sock,buffer, BUFSIZE, 0)){};
 
+	//Receive server response to list creation
 	int numBytesReceived = 0;
 	while(numBytesReceived += recv(sock, response+numBytesReceived, BUFSIZE, 0)){};
 
@@ -387,6 +404,7 @@ void Peer::list(){
 }
 
 void Peer::text(std::string message){
+	//Adds a TextMsg into the MessageQueue
 	TextMsg textMessage = new TextMsg(m_username, message, NULL);
 	std::string hashed = hash256Message(&textMessage);
 	pthread_mutex_lock(&messageMutex);
@@ -409,6 +427,7 @@ void Peer::notifyRecipientDied(IPaddr *recipient){
 	//Create Socket on port 11111 to send UI commands to Server
 	int sock = createSocketToServer();
 
+	//Send dropped recipient IPaddr to the server
 	NotifyDroppedPeerMsg outputMsg = NotifyDroppedPeerMsg(m_username, Direction::P2S, m_myChatroom, &recipient);
   	buffer = outputMsg.getMessageStruct();
   	while(send(sock,buffer, BUFSIZE, 0)){};
