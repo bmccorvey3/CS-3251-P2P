@@ -25,7 +25,7 @@ Peer::~Peer()
 	delete std::queue<TextMsg> m_messageList;
 	delete std::vector<std::string> m_messageHashes;
 
-	delete std::string username;
+	delete std::string username = NULL;
 
 	delete IPaddr primaryRecipient;
 	delete IPaddr secondaryRecipient;
@@ -70,7 +70,7 @@ void Peer::receiveFromPeers(int portno){
   if(newInstance){
   	m_messageHashes.push_back(hashed);
   	m_messageList.push(message);
-  	cout << message.getPayloadText();
+  	cout << message.getTextPayload();
   }
   close(this_sock);
   close(sender_sock);
@@ -102,19 +102,19 @@ void Peer::receiveFromServer(){
 	  //Receiving from Server
 	  int numBytesReceived = 0;
 	  while(numBytesReceived += recv(svr_sock, buffer+numBytesReceived, BUFSIZE, 0)>0){};
-  	  BaseMessage msg = buffer;
-  	  string type = msg.getType();
+	  BaseMessage *msg = BaseMessage::getInstance(buffer);
+  	  string type = msg->getMessageType();
   	  //UpdateRecipients Message
-  	  if(type.compare("update")){
-    		UpdateRecipientsMsg update = buffer;
-    		updateRecipients(update.getPrimaryRecipients(),update.getSecondaryRecipients());
+  	  if(type.compare("upps")){
+    		UpdateRecipientsMsg *update = UpdateRecipientsMsg::getInstance(buffer);
+    		updateRecipients(update->getPrimaryRecipients(),update->getSecondaryRecipients());
     		cout << update.getPrimaryRecipients() << update.getSecondaryRecipients();
 
-    		response = new UpdateRecipientsMsg("hi");
+    		response = (void*) msg->getMessageStruct();
     		while(send(svr_sock, response, BUFSIZE,0));
     	}
   	//Peer Dropped Message
-    	if(type.compare("dropped")){
+    	if(type.compare("drps")){
     		cout << "You have been dropped";
     	}
   }
@@ -228,73 +228,80 @@ void Peer::sendToServer(){
   	string message = strtok(NULL, " ");
 
   	code = toLowerCase(code);
+  	Direction dir= Direction::P2S;
 
   	if(code.compare("text")){
-		TextMsg textMessage = new TextMsg(message);
+		TextMsg textMessage = new TextMsg(username, message, NULL);
 		string hashed = hash256Message(textMessage);
 		m_messageHashes.push_back(hashed);
 		m_messageList.push(textMessage);
 	}
 	else if(code.compare("enter")){
-		buffer = new EnterChatroomMsg(message);
+		EnterChatroomMsg outputMsg = EnterChatroomMsg(username, dir, message);
+		buffer = outputMsg.getMessageStruct();
   		while(send(sock,buffer, BUFSIZE, 0)){};
 
   		int numBytesReceived = 0;
 	  	while(numBytesReceived += recv(sock, response+numBytesReceived, BUFSIZE, 0)){};
 
 	  	EnterChatroomMsg chat = response;
-	  	cout << chat.getChatRoomFromPayload();
+	  	cout << chat.getPayloadString();
 	}
 	else if(code.compare("leave")){
-		buffer = new LeaveChatroomMsg(message);
+		LeaveChatroomMsg outputMsg = LeaveChatroomMsg(username, dir, message);
+		buffer = outputMsg.getMessageStruct();
   		while(send(sock,buffer, BUFSIZE, 0)){};
 
   		int numBytesReceived = 0;
 	  	while(numBytesReceived += recv(sock, response+numBytesReceived, BUFSIZE, 0)){};
 
 	  	LeaveChatroomMsg left = response;
-  	  	cout << left.getChatRoomFromPayload();
+  	  	cout << left.getPayloadString();
 	}
 	else if(code.compare("create")){
-		buffer = new CreateChatroomMsg(message);
+		CreateChatroomMsg outputMsg = CreateChatroomMsg(username, dir, message);
+		buffer = outputMsg.getMessageStruct();
   		while(send(sock,buffer, BUFSIZE, 0)){};
 
   		int numBytesReceived = 0;
 	  	while(numBytesReceived += recv(sock, response+numBytesReceived, BUFSIZE, 0)){};
 
   		CreateChatroomMsg created = response;
-  	  	cout << created.getChatRoomFromPayloadS2P();
+  	  	cout << created.getPayloadString();
 	}
 	else if(code.compare("destroy")){
-		buffer = new DestroyChatroomMsg(message);
+		DestroyChatroomMsg outputMsg = DestroyChatroomMsg(username, dir, message);
+		buffer = outputMsg.getMessageStruct();
   		while(send(sock,buffer, BUFSIZE, 0)){};
 
   		int numBytesReceived = 0;
 	  	while(numBytesReceived += recv(sock, response+numBytesReceived, BUFSIZE, 0)){};
   	  
 	  	DestroyChatroomMsg destroyed = response;
-  	  	cout << destroyed.getDestroyedChatRoomS2P();
+  	  	cout << destroyed.getPayloadString();
 	}
 	else if(code.compare("list")){
-		buffer = new ListChatroomMsg(message);
+		ListChatroomMsg outputMsg = ListChatroomMsg(dir, NULL);
+		buffer = outputMsg.getMessageStruct();
   		while(send(sock,buffer, BUFSIZE, 0)){};
 
   		int numBytesReceived = 0;
 	  	while(numBytesReceived += recv(sock, response+numBytesReceived, BUFSIZE, 0)){};
   	
 	  	ListChatroomMsg list = response;
-	  	cout << list.getListofChatrooms();
+	  	cout << list.getPayloadString();
   	}
 	else if(code.compare("username")){
-		buffer = new ChooseUsernameMsg(message);
+		ChooseUsernameMsg outputMsg = ChooseUsernameMsg(message, dir);
+		buffer = outputMsg.getMessageStruct();
   		while(send(sock,buffer, BUFSIZE, 0)){};
 
   		int numBytesReceived = 0;
 	  	while(numBytesReceived += recv(sock, response+numBytesReceived, BUFSIZE, 0)){};
   	 
 	  	ChooseUsernameMsg user = response;
-  	 	cout <<user.getUsernameP2S();
-  	 	username = user.getUsernameP2S();
+  	 	cout <<user.getPayloadString();
+  	 	username = user.getUsername();
 	}	
 	else if(code.compare("h")){
 		printPrompt();
@@ -335,9 +342,10 @@ std::string Peer::toLowerCase(std::string message){
 }
 
 std::string Peer::hash256Message(TextMsg message){
-	char *output;
+	unsigned char *output;
+	const unsigned char *msg = message.getPayloadString();
 	//SHA256().CalculateDigest(pbOutputBuffer, pbData, nDataLen);
-	CryptoPP::SHA256::SHA256().CalculateDigest(output, (const char*)message.getPayloadText(), sizeof(message));
+	CryptoPP::SHA256::SHA256().CalculateDigest(output, msg, sizeof(message));
 	std::string returnMessage(output);
 
 	return returnMessage;
