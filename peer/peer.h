@@ -105,7 +105,7 @@ class Peer
         /*
         *Using the SHA256 Hash, any message recieved/sent will be hashed.
         */
-        std::string hash256Message(TextMsg message);
+        std::string hash256Message(TextMsg *message);
 
         /*
          * initializes mutexes
@@ -115,7 +115,7 @@ class Peer
         /*
          * Updates Recipients received from server
          */
-        void updateRecipients(std::string one, std::string two);
+        void updateRecipients(sockaddr_in *one, sockaddr_in *two);
 
         /*
         *Forces lowercase on Strings
@@ -125,7 +125,7 @@ class Peer
         *Notifies the server if one of the two recipients of the peer went offline
         *and timed out the ACK response
         */
-        void notifyRecipientDied(IPaddr recipient);
+        void notifyRecipientDied(IPaddr *recipient);
 
         /*
         *Sends a prompt of instructions to stdout

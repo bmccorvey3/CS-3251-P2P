@@ -133,7 +133,11 @@ void Peer::receiveFromServer(){
     		UpdateRecipientsMsg *update = UpdateRecipientsMsg::getInstance(buffer);
     		string newPrimary = update->getPrimaryRecipients();
     		string newSecondary = update->getSecondaryRecipients();
-    		updateRecipients(newPrimary, newSecondary);
+
+    		sockaddr_in *new1 =update->getIPaddr1();
+    		sockaddr_in *new2 =update->getIPaddr2();
+
+    		updateRecipients(new1, new2);
     		cout << newPrimary << newSecondary;
 
     		response = (void*) msg->getMessageStruct();
@@ -233,18 +237,18 @@ void Peer::sendToPeers(){
   			timed = true;
   		}
   		if(bytesRecv2 == 0){
-  			timed =
+  			timed2 = true;
   		}
   	}
 	pthread_mutex_unlock(&messageMutex);
 
   	close(sock);
   	if(timed){
-  		notifyRecipientDied(primaryRecipient);
+  		notifyRecipientDied(&primaryRecipient);
   	}
   	close(sock);
   	if(timed2){
-  		notifyRecipientDied(secondaryRecipient);
+  		notifyRecipientDied(&secondaryRecipient);
   	}
 
 
@@ -384,7 +388,7 @@ void Peer::list(){
 
 void Peer::text(std::string message){
 	TextMsg textMessage = new TextMsg(m_username, message, NULL);
-	std::string hashed = hash256Message(textMessage);
+	std::string hashed = hash256Message(&textMessage);
 	pthread_mutex_lock(&messageMutex);
 	pthread_mutex_lock(&hashMutex);
 	m_messageHashes.push_back(hashed);
@@ -395,7 +399,7 @@ void Peer::text(std::string message){
 
 }
 
-void Peer::notifyRecipientDied(IPaddr recipient){
+void Peer::notifyRecipientDied(IPaddr *recipient){
 	void buffer[BUFSIZE];
 	void response[BUFSIZE];
   	memset(buffer, '\0', sizeof(buffer));
@@ -405,7 +409,7 @@ void Peer::notifyRecipientDied(IPaddr recipient){
 	//Create Socket on port 11111 to send UI commands to Server
 	int sock = createSocketToServer();
 
-	NotifyDroppedPeerMsg outputMsg = NotifyDroppedPeerMsg(m_username, recipient, NULL);
+	NotifyDroppedPeerMsg outputMsg = NotifyDroppedPeerMsg(m_username, Direction::P2S, m_myChatroom, &recipient);
   	buffer = outputMsg.getMessageStruct();
   	while(send(sock,buffer, BUFSIZE, 0)){};
 
@@ -453,12 +457,10 @@ void Peer::operateUI(){
 	}
 }
 
-void Peer::updateRecipients(std::string one, std::string two){
-	char *oneChar = one.c_str();
-	char *twoChar = two.c_str();
+void Peer::updateRecipients(sockaddr_in *one, sockaddr_in *two){
 	pthread_mutex_lock(&recipientMutex);
-	inet_aton(oneChar, &primaryRecipient);
-	inet_aton(twoChar, &secondaryRecipient);
+	primaryRecipient = one->sin_addr;
+	secondaryRecipient = two->sin_addr;
 	pthread_mutex_unlock(&recipientMutex);
 }
 
@@ -486,9 +488,9 @@ std::string Peer::toLowerCase(std::string message){
   	return code;
 }
 
-std::string Peer::hash256Message(TextMsg message){
+std::string Peer::hash256Message(TextMsg *message){
 	unsigned char *output;
-	const unsigned char *msg = message.getPayloadString();
+	const unsigned char *msg = message->getPayloadString();
 	//SHA256().CalculateDigest(pbOutputBuffer, pbData, nDataLen);
 	CryptoPP::SHA256::SHA256().CalculateDigest(output, msg, sizeof(message));
 	std::string returnMessage(output);
