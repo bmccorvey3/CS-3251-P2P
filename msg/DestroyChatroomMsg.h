@@ -14,29 +14,27 @@
 
 class DestroyChatroomMsg: public BaseMessage {
 public:
-    DestroyChatroomMsg(string username, Direction dir, string chatRoomName, string payload);
+    DestroyChatroomMsg(string username, Direction dir, string chatRoomName);
     DestroyChatroomMsg(void* input);
     ~DestroyChatroomMsg(); //TODO delete pointers
     
     void* getMessageStruct();
     
-    string getDestroyPayload();
     string getPayloadString();
 
     
 private:
-    string m_destroyPayload;
     const static string m_prefixP2S;
     const static string m_prefixS2P;
     const static string m_S2P_ERR;
     const static string m_postfixP2S;
     const static string m_postfixS2P;
     
-    static const size_t p2sTotalPayloadSize = sizeof(m_destroyPayload)+ sizeof(m_prefixP2S) +
+    static const size_t p2sTotalPayloadSize = sizeof(m_payloadString)+ sizeof(m_prefixP2S) +
     sizeof(m_postfixP2S);
-    static const size_t s2pTotalPayloadSize = sizeof(m_destroyPayload) + sizeof(m_prefixS2P)
+    static const size_t s2pTotalPayloadSize = sizeof(m_payloadString) + sizeof(m_prefixS2P)
     + sizeof(m_postfixS2P);
-    static const size_t s2pErrTotalPayloadSize = sizeof(m_destroyPayload) + sizeof(m_S2P_ERR);
+    static const size_t s2pErrTotalPayloadSize = sizeof(m_payloadString) + sizeof(m_S2P_ERR);
     
     typedef struct __attribute__((packed)) FULL_MESSAGE_P2S {
         StBaseHeader stBaseHeader;

@@ -20,11 +20,9 @@ public :
 
     void* getMessageStruct();
     
-    std::string getTextPayload();
     string getPayloadString();
     
-private:
-    std::string m_textPayload;
+//private:
     const static std::string m_prefixStr;
 };
 

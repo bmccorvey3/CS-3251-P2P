@@ -14,29 +14,27 @@
 
 class CreateChatroomMsg : public BaseMessage {
 public :
-    CreateChatroomMsg(string username, Direction dir, string chatRoomName, string payload);
+    CreateChatroomMsg(string username, Direction dir, string chatRoomName);
     CreateChatroomMsg(void* input);
     ~CreateChatroomMsg(); //TODO delete pointers
     
     void* getMessageStruct();
     
-    string getChatRoomNamePayload();
     string getPayloadString();
 
     
 private:
-    string m_chatRoomNamePayload;
     const static string m_prefixP2S;
     const static string m_prefixS2P;
     const static string m_prefixS2P_ERR;
     const static string m_postfixP2S;
     const static string m_postFixS2P;
     const static string m_postfixS2P_ERR;
-    static const size_t p2sTotalPayloadSize = sizeof(m_chatRoomNamePayload)+ sizeof(m_prefixP2S) +
+    static const size_t p2sTotalPayloadSize = sizeof(m_payloadString)+ sizeof(m_prefixP2S) +
                                                 sizeof(m_postfixP2S);
-    static const size_t s2pTotalPayloadSize = sizeof(m_chatRoomNamePayload) + sizeof(m_prefixS2P)
+    static const size_t s2pTotalPayloadSize = sizeof(m_payloadString) + sizeof(m_prefixS2P)
                                                 + sizeof(m_postFixS2P);
-    static const size_t s2pErrTotalPayloadSize = sizeof(m_chatRoomNamePayload) +
+    static const size_t s2pErrTotalPayloadSize = sizeof(m_payloadString) +
                             + sizeof(m_prefixS2P_ERR) + sizeof(m_postfixS2P_ERR);
     
     typedef struct __attribute__((packed)) FULL_MESSAGE_P2S {

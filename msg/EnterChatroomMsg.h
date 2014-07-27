@@ -14,27 +14,25 @@
 
 class EnterChatroomMsg: public BaseMessage {
 public:
-    EnterChatroomMsg(string username, Direction dir, string chatRoomName, string payload);
+    EnterChatroomMsg(string username, Direction dir, string chatRoomName);
     EnterChatroomMsg(void* input);
     ~EnterChatroomMsg(); //TODO delete pointers
     
     void* getMessageStruct();
     
-    string getEnterPayload();
     string getPayloadString();
 
     
 private:
-    string m_enterPayload;
     const static string m_prefixP2S;
     const static string m_prefixS2P;
     const static string m_S2P_ERR;
     const static string m_postfixS2P;
     
-    static const size_t p2sTotalPayloadSize = sizeof(m_enterPayload)+ sizeof(m_prefixP2S);
-    static const size_t s2pTotalPayloadSize = sizeof(m_enterPayload) + sizeof(m_prefixS2P)
+    static const size_t p2sTotalPayloadSize = sizeof(m_payloadString)+ sizeof(m_prefixP2S);
+    static const size_t s2pTotalPayloadSize = sizeof(m_payloadString) + sizeof(m_prefixS2P)
     + sizeof(m_postfixS2P);
-    static const size_t s2pErrTotalPayloadSize = sizeof(m_enterPayload) + sizeof(m_S2P_ERR);
+    static const size_t s2pErrTotalPayloadSize = sizeof(m_payloadString) + sizeof(m_S2P_ERR);
     
     typedef struct __attribute__((packed)) FULL_MESSAGE_P2S {
         StBaseHeader stBaseHeader;

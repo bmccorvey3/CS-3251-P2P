@@ -2,3 +2,12 @@ MessageHierarchyP2P/
 .cproject
 .project
 .settings
+MessageHierarchyP2P/*
+/MessageHierarchyP2P.xcodeproj/*
+MessageHierarchyP2P/MessageHierarchyP2P.xcodeproj/project.xcworkspace/xcuserdata/brent.xcuserdatad/UserInterfaceState.xcuserstate
+TestingMessage/*
+TestingMessage/
+MessageHierarchyP2P/
+*.xcuserstate
+*.xcbkptlist
+MessageHierarchyP2P/
