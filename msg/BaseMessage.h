@@ -62,7 +62,7 @@ typedef enum MESSAGE_TYPE {
 //    char payload[1024];
 //} StBaseMessage;
 
-typedef struct header_t {
+typedef struct __attribute__((packed)) header_t {
     unsigned int length;
     char username[16];
     unsigned int salt;
@@ -76,7 +76,9 @@ public:
     BaseMessage(void* parseMe);
     BaseMessage(string username, Direction dir, string chatRoomName);
     
-    
+    /*
+     Static constant for the length of header
+     */
     
     static const unsigned int HEADER_LENGTH = sizeof(unsigned int) +
                             sizeof(char[16]) + sizeof(unsigned int) +
@@ -111,6 +113,8 @@ public:
     virtual void* getMessageStruct() = 0;
     // Print out debug info
     static string log(BaseMessage*);
+    // Make sure 2 messages are equal
+    static void assertEquals(BaseMessage* left, BaseMessage* right);
     // Get message that can be cast to another kind of message from a void*
     static BaseMessage* getInstance(void*);
     
@@ -118,7 +122,7 @@ public:
     
    // static virtual BaseMessage* getParticularMessage() = 0;
     
-protected:
+//protected:
 
     unsigned int m_length;
     string m_username;

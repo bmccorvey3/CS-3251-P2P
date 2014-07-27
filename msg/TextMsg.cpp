@@ -8,33 +8,32 @@
 
 #include "TextMsg.h"
 #define POS_TXT_PREFIX 0 // position of "txt:"
-const string TextMsg::m_prefixStr = "txt:";
+const string TextMsg::m_prefixStr = "txt:\0";
 
 TextMsg::TextMsg(string username, string chatRoomName, string payload) : BaseMessage(username,Direction::P2P, chatRoomName)
 {
     m_payloadString = payload;
-    m_textPayload = payload;
     m_messageType = MessageType::TEXT;
-    m_length = HEADER_LENGTH + sizeof(m_textPayload) + sizeof(m_prefixStr);
+    m_length = (unsigned int) (HEADER_LENGTH + m_payloadString.length() + m_prefixStr.length());
     m_code = "text";
 }
 
 TextMsg::~TextMsg() {}
 
 TextMsg::TextMsg(void* input) : BaseMessage(input){
-    char* textPayload = (char*) malloc(m_length);
-    memcpy(textPayload, &((char*)input)[HEADER_LENGTH], m_length);
-    std::string tempTextPayload(textPayload);
-    if(tempTextPayload.find(m_prefixStr) == POS_TXT_PREFIX){
-        m_textPayload = std::string(textPayload);
-        // cut down on string to what we actuall want
-        m_textPayload = m_textPayload.substr(POS_TXT_PREFIX+m_prefixStr.size());
-        // TODO deallocate m_textPayload in destructor
-    } else {
-        fprintf(stderr, "Couldn't find 'txt:' in text payload\n");
-        // TODO add log information
-    }
-    // free textPayload; // TODO do I need this?
+//    char* textPayload = (char*) malloc(m_length);
+//    memcpy(textPayload, &((char*)input)[HEADER_LENGTH], m_length);
+//    std::string tempTextPayload(textPayload);
+//    if(tempTextPayload.find(m_presfixStr) == POS_TXT_PREFIX){
+//        m_payloadString = std::string(textPayload);
+//        // cut down on string to what we actuall want
+//        m_payloadString = m_payloadString.substr(POS_TXT_PREFIX+m_prefixStr.size());
+//        // TODO deallocate m_payloadString in destructor
+//    } else {
+//        fprintf(stderr, "Couldn't find 'txt:' in text payload\n");
+//        // TODO add log information
+//    }
+//    // free textPayload; // TODO do I need this?
 }
 
 void* TextMsg::getMessageStruct()
@@ -42,21 +41,22 @@ void* TextMsg::getMessageStruct()
     StBaseHeader* header = BaseMessage::getHeaderStruct();
     header->length = m_length;
     memcpy(&(header->code), &m_code, CODE_LENGTH);
-    const size_t totalPayloadSize =sizeof(m_textPayload)+ sizeof(m_prefixStr);
-    typedef struct FULL_MESSAGE {
-        StBaseHeader stBaseHeader;
-        char payload[totalPayloadSize];
-    } FullMessage;
-    FullMessage* fullMessage = (FullMessage*)malloc(sizeof(FullMessage));
-    memcpy(fullMessage,&header,sizeof(StBaseHeader));
-    std::string tempPayloadStr = m_prefixStr + m_textPayload;
+
+//    std::cout << "Length of payload: " << m_payloadString.length() << std::endl
+//    << "Length of prefix str for TextMsg: " << m_prefixStr.le << std::endl;
+    const size_t totalPayloadSize = m_payloadString.length()+ m_prefixStr.length();
+//    typedef struct __attribute__((packed)) FULL_MESSAGE {
+//        StBaseHeader stBaseHeader;
+//        char payload[totalPayloadSize];
+//    } FullMessage;
+    std::cout << "totalPayloadSize: " << totalPayloadSize << std::endl;
+    void* fullMessage = malloc(totalPayloadSize); //ERROR
+    memcpy(&fullMessage,&header,sizeof(StBaseHeader));
+    std::string tempPayloadStr = m_prefixStr + m_payloadString;
     const char* tempPayloadStr_cstr = tempPayloadStr.c_str();
-    memcpy(&fullMessage[sizeof(StBaseHeader)], &tempPayloadStr_cstr, totalPayloadSize);
-    free(header);
+    memcpy(&((char*)fullMessage)[sizeof(StBaseHeader)], &tempPayloadStr_cstr, totalPayloadSize);
+    //free(header);
     return fullMessage;
-}
-std::string TextMsg::getTextPayload() {
-    return m_textPayload;
 }
 
 string TextMsg::getPayloadString() {

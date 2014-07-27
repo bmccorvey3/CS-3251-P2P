@@ -20,12 +20,10 @@ public :
     
     void* getMessageStruct();
     
-    string getListPayload();
     string getPayloadString();
 
     
 private:
-    string m_listPayload;
     const static string m_P2S;
     const static string m_prefixS2P;
     const static string m_postFixS2P;

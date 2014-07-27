@@ -14,27 +14,23 @@
 
 class LeaveChatroomMsg: public BaseMessage {
 public :
-    LeaveChatroomMsg(string username, Direction dir, string chatRoomName, string payload);
+    LeaveChatroomMsg(string username, Direction dir, string chatRoomName);
     LeaveChatroomMsg(void* input);
     ~LeaveChatroomMsg(); //TODO delete pointers
     
     void* getMessageStruct();
     
-    string getLeaveUserPayload();
-    string getLeaveChatroomPayload();
     string getPayloadString();
 
     
 private:
-    string m_leaveUserPayload;
-    string m_leaveChatroomPayload;
     const static string m_prefixS2P;
     const static string m_postfixP2S;
     const static string m_postfixS2P;
     
-    static const size_t p2sTotalPayloadSize = sizeof(m_leaveUserPayload)+ sizeof(m_postfixP2S);
-    static const size_t s2pTotalPayloadSize = sizeof(m_leaveUserPayload) + sizeof(m_prefixS2P)
-    + sizeof(m_postfixS2P) + sizeof(m_leaveChatroomPayload);
+    static const size_t p2sTotalPayloadSize = sizeof(m_payloadString)+ sizeof(m_postfixP2S);
+    static const size_t s2pTotalPayloadSize = sizeof(m_payloadString) + sizeof(m_prefixS2P)
+    + sizeof(m_postfixS2P) + sizeof(m_payloadString);
     
     typedef struct __attribute__((packed)) FULL_MESSAGE_P2S {
         StBaseHeader stBaseHeader;

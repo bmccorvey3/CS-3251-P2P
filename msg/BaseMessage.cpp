@@ -16,7 +16,11 @@
 #include "ListChatroomMsg.h"
 #include "NotifyDroppedPeerMsg.h"
 #include "UpdateRecipientsMsg.h"
+#include <cassert>
 
+/*
+ Constructor for BaseMessage
+ */
 BaseMessage::BaseMessage(string username, Direction dir, string chatRoomName):
 m_username(username), m_dir(dir), m_chatRoomName(chatRoomName)
 {
@@ -24,6 +28,9 @@ m_username(username), m_dir(dir), m_chatRoomName(chatRoomName)
     // TODO do I need to set direction in child classes?
 }
 
+/*
+ Constructor for BaseMessage if user passes in a void input
+ */
 BaseMessage::BaseMessage(void* msg)
 {
     StBaseHeader* stMsg = (StBaseHeader*) msg;
@@ -37,7 +44,11 @@ BaseMessage::BaseMessage(void* msg)
 }
 
 // TODO check scope on this
-MessageType BaseMessage::convertStringToMessageType(std::string stringType, Direction &direction){
+
+/*
+ Sets the MessageType and Direction for each string passed in as args
+ */
+MessageType BaseMessage::convertStringToMessageType(std::string stringType, Direction& direction){
     direction = Direction::ERROR;
     MessageType msg_type = MT_ERROR;
     if (strcmp(stringType.c_str(), "text") == 0){
@@ -109,15 +120,18 @@ MessageType BaseMessage::convertStringToMessageType(std::string stringType, Dire
     return msg_type;
 }
 
+/*
+ Returns a new message based on the void input passed in
+ */
 BaseMessage* BaseMessage::getInstance(void* input){
-    Direction dir;
+//    Direction dir;
     MessageType type = getMessageType(input);
     StBaseHeader* header = (StBaseHeader*) input;
-    unsigned int length = header->length;
+//    unsigned int length = header->length;
     char* username = username = header->username;
-    unsigned int salt = header->salt;
-    char* code(header->code);
-    char* chatRoomName = header->chatRoomName;
+//    unsigned int salt = header->salt;
+//    char* code(header->code);
+//    char* chatRoomName = header->chatRoomName;
     
     switch (type) {
         case TEXT:
@@ -192,12 +206,16 @@ BaseMessage* BaseMessage::getInstance(void* input){
 //    
 //}
 
-static string log(BaseMessage* msg) {
+
+/*
+ Logs a Message to the console in attempts to debug
+ */
+string BaseMessage::log(BaseMessage* msg) {
     std::stringstream ss;
     ss << "The length is: " << msg->getLength() << std::endl;
     ss << "The username is: " << msg->getUsername() << std::endl;
    // ss << "The salt is: " << msg->getSalt() << std::endl;
- //   ss << "The message type is: " << msg->getMessageType() << std::endl;
+    ss << "The message type is: " << BaseMessage::getMessageType(msg) << std::endl;
     ss << "The string type is: " << msg->getMessageCode() << std::endl;
     ss << "The direction is: " << static_cast<int>(msg->getDirection()) << std::endl;
     ss << "The chatroom name is: " << msg->getChatRoomName() << std::endl;
@@ -205,6 +223,24 @@ static string log(BaseMessage* msg) {
     return ss.str();
 }
 
+/*
+ Checks to see if the void message is equivalent to a message passed in normally
+ */
+void BaseMessage::assertEquals(BaseMessage* left, BaseMessage* right){
+    assert(left->m_length == right->m_length);
+    assert(left->m_username.compare(right->m_username) == 0);
+    assert(left->m_salt == right->m_salt);
+    assert(left->m_messageType == right->m_messageType);
+    assert(left->m_code.compare(right->m_code) == 0);
+    assert(left->m_dir == right->m_dir);
+    assert(left->m_chatRoomName.compare(right->m_chatRoomName) == 0);
+    assert(left->m_payloadString.compare(right->m_payloadString) == 0);
+}
+
+
+/*
+ Gets the header struct that will be passed on the wire
+ */
 StBaseHeader* BaseMessage::getHeaderStruct(){
     StBaseHeader* retStruct = (StBaseHeader*) malloc(sizeof(HEADER_LENGTH));
     memset((void*)retStruct, 0, sizeof(retStruct)); // ensures extra 0s for char[]s
@@ -259,6 +295,10 @@ string BaseMessage::getUsername() {
 //    return m_salt;
 //}
 //
+
+/*
+ Gets the MessageType based off void input
+ */
 MessageType BaseMessage::getMessageType(void* input) {
     StBaseHeader* header = (StBaseHeader*) input;
     std::string msgType(header->code);

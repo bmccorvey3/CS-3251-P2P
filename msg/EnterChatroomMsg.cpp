@@ -13,11 +13,9 @@ const string EnterChatroomMsg::m_prefixS2P = "Entered chatroom ";
 const string EnterChatroomMsg::m_S2P_ERR = "Choose a username.";
 const string EnterChatroomMsg::m_postfixS2P = ".";
 
-EnterChatroomMsg::EnterChatroomMsg(string username, Direction dir, string chatRoomName, string payload)
+EnterChatroomMsg::EnterChatroomMsg(string username, Direction dir, string chatRoomName)
 : BaseMessage(username, dir, chatRoomName)
 {
-    m_payloadString = payload;
-    m_enterPayload = payload;
     if(dir == Direction::P2S) {
         m_messageType = MessageType::ENTER_P2S;
         m_length = HEADER_LENGTH + p2sTotalPayloadSize;
@@ -41,27 +39,27 @@ EnterChatroomMsg::EnterChatroomMsg(string username, Direction dir, string chatRo
 EnterChatroomMsg::~EnterChatroomMsg() {}
 
 EnterChatroomMsg::EnterChatroomMsg(void* input) : BaseMessage(input) {
-    char* chatRoomPayload = (char*) malloc(m_length);
-    memcpy(chatRoomPayload, &((char*)input)[HEADER_LENGTH], m_length);
-    std::string tempChatRoomPayload(chatRoomPayload);
-    if(tempChatRoomPayload.find(m_prefixP2S) > 0){
-        m_enterPayload = string(chatRoomPayload);
-        // cut down on string to what we actuall want
-        m_enterPayload = m_enterPayload.substr(0, m_username.size());
-        // TODO deallocate m_textPayload in destructor
-    }
-    else if (tempChatRoomPayload.find(m_prefixS2P) > 0) {
-        m_enterPayload = string(chatRoomPayload);
-        m_enterPayload = m_enterPayload.substr(m_prefixS2P.size(), m_chatRoomName.size());
-    }
-    else if (tempChatRoomPayload.find(m_S2P_ERR) > 0){
-        m_enterPayload = string(chatRoomPayload);
-    }
-    else {
-        fprintf(stderr, "Couldn't find in enter chatroom payload\n");
-        // TODO add log information
-    }
-    // free choosePayload; // TODO do I need this?
+//    char* chatRoomPayload = (char*) malloc(m_length);
+//    memcpy(chatRoomPayload, &((char*)input)[HEADER_LENGTH], m_length);
+//    std::string tempChatRoomPayload(chatRoomPayload);
+//    if(tempChatRoomPayload.find(m_prefixP2S) > 0){
+//        m_payloadString = string(chatRoomPayload);
+//        // cut down on string to what we actuall want
+//        m_payloadString = m_payloadString.substr(0, m_username.size());
+//        // TODO deallocate m_textPayload in destructor
+//    }
+//    else if (tempChatRoomPayload.find(m_prefixS2P) > 0) {
+//        m_payloadString = string(chatRoomPayload);
+//        m_payloadString = m_payloadString.substr(m_prefixS2P.size(), m_chatRoomName.size());
+//    }
+//    else if (tempChatRoomPayload.find(m_S2P_ERR) > 0){
+//        m_payloadString = string(chatRoomPayload);
+//    }
+//    else {
+//        fprintf(stderr, "Couldn't find in enter chatroom payload\n");
+//        // TODO add log information
+//    }
+//    // free choosePayload; // TODO do I need this?
 }
 
 void* EnterChatroomMsg::getMessageStruct() {
@@ -78,13 +76,13 @@ void* EnterChatroomMsg::getMessageStruct() {
     else if (m_dir == Direction::ERROR) {
         fullMessage = (FullMessageS2PErr*) malloc(sizeof(FullMessageS2PErr));
     }
-    memcpy(fullMessage,&header,sizeof(StBaseHeader));
+    memcpy(&fullMessage,&header,sizeof(StBaseHeader));
     string tempPayloadStr;
     if(m_dir == Direction::P2S) {
-        tempPayloadStr = m_prefixP2S + m_enterPayload;
+        tempPayloadStr = m_prefixP2S + m_username;
     }
     else if (m_dir == Direction::S2P) {
-        tempPayloadStr = m_prefixS2P + m_enterPayload + m_postfixS2P;
+        tempPayloadStr = m_prefixS2P + m_chatRoomName + m_postfixS2P;
     }
     else if (m_dir == Direction::ERROR) {
         tempPayloadStr = m_S2P_ERR;
@@ -100,12 +98,8 @@ void* EnterChatroomMsg::getMessageStruct() {
         memcpy(&((FullMessageS2PErr*)fullMessage)[sizeof(StBaseHeader)], &tempPayloadStr_cstr, s2pErrTotalPayloadSize);
     }
     
-    free(header);
+    //free(header);
     return fullMessage;
-}
-
-string EnterChatroomMsg::getEnterPayload() {
-    return m_enterPayload;
 }
 
 string EnterChatroomMsg::getPayloadString() {

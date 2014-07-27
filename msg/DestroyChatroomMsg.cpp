@@ -14,11 +14,9 @@ const string DestroyChatroomMsg::m_S2P_ERR = "Chatroom occupied.";
 const string DestroyChatroomMsg::m_postfixP2S = ".";
 const string DestroyChatroomMsg::m_postfixS2P = "destroyed.";
 
-DestroyChatroomMsg::DestroyChatroomMsg(string username, Direction dir, string chatRoomName, string payload)
+DestroyChatroomMsg::DestroyChatroomMsg(string username, Direction dir, string chatRoomName)
 : BaseMessage(username, dir, chatRoomName)
 {
-    m_payloadString = payload;
-    m_destroyPayload = payload;
     if(dir == Direction::P2S) {
         m_messageType = MessageType::DESTROY_P2S;
         m_length = HEADER_LENGTH + p2sTotalPayloadSize;
@@ -42,27 +40,27 @@ DestroyChatroomMsg::DestroyChatroomMsg(string username, Direction dir, string ch
 DestroyChatroomMsg::~DestroyChatroomMsg() {}
 
 DestroyChatroomMsg::DestroyChatroomMsg(void* input) : BaseMessage(input) {
-    char* chatRoomPayload = (char*) malloc(m_length);
-    memcpy(chatRoomPayload, &((char*)input)[HEADER_LENGTH], m_length);
-    std::string tempChatRoomPayload(chatRoomPayload);
-    if(tempChatRoomPayload.find(m_prefixP2S) > 0){
-        m_destroyPayload = string(chatRoomPayload);
-        // cut down on string to what we actuall want
-        m_destroyPayload = m_destroyPayload.substr(m_prefixP2S.size(), m_chatRoomName.size());
-        // TODO deallocate m_textPayload in destructor
-    }
-    else if (tempChatRoomPayload.find(m_postfixS2P) > 0) {
-        m_destroyPayload = string(chatRoomPayload);
-        m_destroyPayload = m_destroyPayload.substr(m_prefixS2P.size(), m_chatRoomName.size());
-    }
-    else if (tempChatRoomPayload.find(m_S2P_ERR) > 0){
-        m_destroyPayload = string(chatRoomPayload);
-    }
-    else {
-        fprintf(stderr, "Couldn't find in destroy chatroom payload\n");
-        // TODO add log information
-    }
-    // free choosePayload; // TODO do I need this?
+//    char* chatRoomPayload = (char*) malloc(m_length);
+//    memcpy(chatRoomPayload, &((char*)input)[HEADER_LENGTH], m_length);
+//    std::string tempChatRoomPayload(chatRoomPayload);
+//    if(tempChatRoomPayload.find(m_prefixP2S) > 0){
+//        m_payloadString = string(chatRoomPayload);
+//        // cut down on string to what we actuall want
+//        m_payloadString = m_payloadString.substr(m_prefixP2S.size(), m_chatRoomName.size());
+//        // TODO deallocate m_textPayload in destructor
+//    }
+//    else if (tempChatRoomPayload.find(m_postfixS2P) > 0) {
+//        m_payloadString = string(chatRoomPayload);
+//        m_payloadString = m_payloadString.substr(m_prefixS2P.size(), m_chatRoomName.size());
+//    }
+//    else if (tempChatRoomPayload.find(m_S2P_ERR) > 0){
+//        m_payloadString = string(chatRoomPayload);
+//    }
+//    else {
+//        fprintf(stderr, "Couldn't find in destroy chatroom payload\n");
+//        // TODO add log information
+//    }
+//    // free choosePayload; // TODO do I need this?
 }
 
 void* DestroyChatroomMsg::getMessageStruct() {
@@ -79,13 +77,13 @@ void* DestroyChatroomMsg::getMessageStruct() {
     else if (m_dir == Direction::ERROR) {
         fullMessage = (FullMessageS2PErr*) malloc(sizeof(FullMessageS2PErr));
     }
-    memcpy(fullMessage,&header,sizeof(StBaseHeader));
+    memcpy(&fullMessage,&header,sizeof(StBaseHeader));
     string tempPayloadStr;
     if(m_dir == Direction::P2S) {
-        tempPayloadStr = m_prefixP2S + m_destroyPayload + m_postfixP2S;
+        tempPayloadStr = m_prefixP2S + m_chatRoomName + m_postfixP2S;
     }
     else if (m_dir == Direction::S2P) {
-        tempPayloadStr = m_prefixS2P + m_destroyPayload + m_postfixS2P;
+        tempPayloadStr = m_prefixS2P + m_chatRoomName + m_postfixS2P;
     }
     else if (m_dir == Direction::ERROR) {
         tempPayloadStr = m_S2P_ERR;
@@ -101,12 +99,8 @@ void* DestroyChatroomMsg::getMessageStruct() {
         memcpy(&((FullMessageS2PErr*)fullMessage)[sizeof(StBaseHeader)], &tempPayloadStr_cstr, s2pErrTotalPayloadSize);
     }
     
-    free(header);
+    //free(header);
     return fullMessage;
-}
-
-string DestroyChatroomMsg::getDestroyPayload() {
-    return m_destroyPayload;
 }
 
 string DestroyChatroomMsg::getPayloadString() {

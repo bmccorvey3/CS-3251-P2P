@@ -8,16 +8,14 @@
 
 #include "LeaveChatroomMsg.h"
 
-const string m_prefixS2P = " left ";
-const string m_postfixP2S = " wants to leave chatroom." ;
-const string m_postfixS2P = " chatroom.";
+const string LeaveChatroomMsg::m_prefixS2P = " left ";
+const string LeaveChatroomMsg::m_postfixP2S = " wants to leave chatroom." ;
+const string LeaveChatroomMsg::m_postfixS2P = " chatroom.";
 
 
-LeaveChatroomMsg::LeaveChatroomMsg(string username, Direction dir, string chatRoomName, string payload)
+LeaveChatroomMsg::LeaveChatroomMsg(string username, Direction dir, string chatRoomName)
 : BaseMessage(username, dir, chatRoomName)
 {
-    m_payloadString = payload;
-    m_leaveChatroomPayload = payload;
     if(dir == Direction::P2S) {
         m_messageType = MessageType::LEAVE_P2S;
         m_length = HEADER_LENGTH + p2sTotalPayloadSize;
@@ -36,27 +34,27 @@ LeaveChatroomMsg::LeaveChatroomMsg(string username, Direction dir, string chatRo
 LeaveChatroomMsg::~LeaveChatroomMsg() {}
 
 LeaveChatroomMsg::LeaveChatroomMsg(void* input) : BaseMessage(input) {
-    char* chatRoomPayload = (char*) malloc(m_length);
-    memcpy(chatRoomPayload, &((char*)input)[HEADER_LENGTH], m_length);
-    std::string tempchatRoomPayload(chatRoomPayload);
-    if(tempchatRoomPayload.find(m_postfixP2S) > 0){
-        m_leaveUserPayload = string(chatRoomPayload);
-        // cut down on string to what we actuall want
-        m_leaveUserPayload = m_leaveUserPayload.substr(0, m_username.size());
-        // TODO deallocate m_textPayload in destructor
-    }
-    else if (tempchatRoomPayload.find(m_prefixS2P) > 0) {
-        m_leaveUserPayload = string(chatRoomPayload);
-        m_leaveUserPayload = m_leaveUserPayload.substr(0, m_username.size());
-        m_leaveChatroomPayload = string(chatRoomPayload);
-        m_leaveChatroomPayload = m_leaveChatroomPayload.substr
-                                (m_username.size()+sizeof(m_prefixS2P),m_chatRoomName.size());
-    }
-    else {
-        fprintf(stderr, "Couldn't find in leave chatroom payload\n");
-        // TODO add log information
-    }
-    // free choosePayload; // TODO do I need this?
+//    char* chatRoomPayload = (char*) malloc(m_length);
+//    memcpy(chatRoomPayload, &((char*)input)[HEADER_LENGTH], m_length);
+//    std::string tempchatRoomPayload(chatRoomPayload);
+//    if(tempchatRoomPayload.find(m_postfixP2S) > 0){
+//        m_payloadString = string(chatRoomPayload);
+//        // cut down on string to what we actuall want
+//        m_payloadString = m_payloadString.substr(0, m_username.size());
+//        // TODO deallocate m_textPayload in destructor
+//    }
+//    else if (tempchatRoomPayload.find(m_prefixS2P) > 0) {
+//        m_payloadString = string(chatRoomPayload);
+//        m_payloadString = m_payloadString.substr(0, m_username.size());
+//        m_payloadString = string(chatRoomPayload);
+//        m_payloadString = m_payloadString.substr
+//                                (m_username.size()+sizeof(m_prefixS2P),m_chatRoomName.size());
+//    }
+//    else {
+//        fprintf(stderr, "Couldn't find in leave chatroom payload\n");
+//        // TODO add log information
+//    }
+//    // free choosePayload; // TODO do I need this?
 }
 
 void* LeaveChatroomMsg::getMessageStruct() {
@@ -70,13 +68,13 @@ void* LeaveChatroomMsg::getMessageStruct() {
     else if (m_dir == Direction::S2P){
         fullMessage = (FullMessageS2P*)malloc(sizeof(FullMessageS2P));
     }
-    memcpy(fullMessage,&header,sizeof(StBaseHeader));
+    memcpy(&fullMessage,&header,sizeof(StBaseHeader));
     string tempPayloadStr;
     if(m_dir == Direction::P2S) {
-        tempPayloadStr = m_leaveUserPayload + m_postfixP2S;
+        tempPayloadStr = m_username + m_postfixP2S;
     }
     else if (m_dir == Direction::S2P) {
-        tempPayloadStr = m_leaveUserPayload + m_prefixS2P + m_leaveChatroomPayload + m_postfixS2P;
+        tempPayloadStr = m_username + m_prefixS2P + m_chatRoomName + m_postfixS2P;
     }
     const char* tempPayloadStr_cstr = tempPayloadStr.c_str();
     if(m_dir == Direction::P2S) {
@@ -85,16 +83,8 @@ void* LeaveChatroomMsg::getMessageStruct() {
     else if(m_dir == Direction::S2P) {
         memcpy(&((FullMessageS2P*)fullMessage)[sizeof(StBaseHeader)], &tempPayloadStr_cstr, s2pTotalPayloadSize);
     }
-    free(header);
+   // free(header);
     return fullMessage;
-}
-
-string LeaveChatroomMsg::getLeaveUserPayload() {
-    return m_leaveUserPayload;
-}
-
-string LeaveChatroomMsg::getLeaveChatroomPayload() {
-    return m_leaveChatroomPayload;
 }
 
 string LeaveChatroomMsg::getPayloadString() {
