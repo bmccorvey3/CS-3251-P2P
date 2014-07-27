@@ -22,8 +22,6 @@ Peer::Peer(char *server)
 	static pthread_mutex_t hashMutex; //Access by receivefromPeers,sendToServer
 
 	static pthread_mutex_t recipientMutex; //Access by receiveFromServer,sendToPeers
-	static pthread_cond_t changeFromServer; //receiveFromServer changes recipient IPaddr
-	static pthread_cond_t sendToRecipient; //sendToPeers use recipient IPaddr
 
 	pthread_mutex_init(&messageMutex, NULL);
 	pthread_cond_init(&messagesToSend, NULL);
@@ -42,6 +40,15 @@ Peer::~Peer()
 	delete IPaddr secondaryRecipient;
 
 
+}
+
+void Peer::mutexInit(){
+	pthread_mutex_init(&messageMutex, NULL);
+	pthread_cond_init(&messagesToSend, NULL);
+
+	pthread_mutex_init(&hashMutex, NULL);
+
+	pthread_mutex_init(&recipientMutex, NULL);
 }
 
 
@@ -208,18 +215,26 @@ void Peer::sendToPeers(){
   		TextMsg txtMsg = m_messageList.pop();
   		buffer = txtMsg.getMessageStruct();
   		buffer2 = txtMsg.getMessageStruct();
-  		while(int value = send(sock,buffer, BUFSIZE, 0)){
-  			if(value == EPIPE){
+  		int bytesRecv1=0;
+  		while(bytesRecv1+=send(sock,buffer, BUFSIZE, 0)){
+  			if(errno == EPIPE){
   				timed = true;
   				break;
   			}
   		}
-			while(int value =send(sock,buffer2, BUFSIZE, 0)){
-				if(value == EPIPE){
+  			int bytesRecv2=0;
+			while(bytesRecv2+=send(sock,buffer2, BUFSIZE, 0)){
+				if(errno == EPIPE){
 				  timed2=true;
 				  break;
 				}
 			}
+  		if(bytesRecv1 == 0){
+  			timed = true;
+  		}
+  		if(bytesRecv2 == 0){
+  			timed =
+  		}
   	}
 	pthread_mutex_unlock(&messageMutex);
 
@@ -379,7 +394,6 @@ void Peer::text(std::string message){
 	pthread_mutex_unlock(&messageMutex);
 
 }
-
 
 void Peer::notifyRecipientDied(IPaddr recipient){
 	void buffer[BUFSIZE];

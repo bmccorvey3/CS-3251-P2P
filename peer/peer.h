@@ -99,18 +99,18 @@ class Peer
 		static pthread_cond_t messagesToSend; //receiveFromPeers adds to Vector
 
 		static pthread_mutex_t hashMutex; //Access by receivefromPeers,sendToServer
-		static pthread_cond_t insertFromPeer; //receiveFromPeers add to Queue
-		static pthread_cond_t insertFromUI; //sendToServer adds to Queue
 
 		static pthread_mutex_t recipientMutex; //Access by receiveFromServer,sendToPeers
-		static pthread_cond_t changeFromServer; //receiveFromServer changes recipient IPaddr
-		static pthread_cond_t sendToRecipient; //sendToPeers use recipient IPaddr
 
         /*
         *Using the SHA256 Hash, any message recieved/sent will be hashed.
         */
         std::string hash256Message(TextMsg message);
 
+        /*
+         * initializes mutexes
+         */
+         void mutexInit();
 
         /*
          * Updates Recipients received from server
