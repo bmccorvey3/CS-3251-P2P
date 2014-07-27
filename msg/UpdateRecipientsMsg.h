@@ -44,6 +44,9 @@ class UpdateRecipientsMsg: public BaseMessage {
     
     static std::string getIPaddrString(IPaddrStruct* ipAddr);
     static std::string getPortString(IPaddrStruct* ipAddr);
+    inline std::string getPayloadString(){
+    	return m_payloadString;
+    }
 private:
     string m_updatePayload;
     const static string m_P2S;

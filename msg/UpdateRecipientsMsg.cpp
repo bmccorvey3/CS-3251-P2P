@@ -39,25 +39,43 @@ UpdateRecipientsMsg::UpdateRecipientsMsg(std::string username, Direction dir,
 	    }
 }
 
-UpdateRecipientsMsg::UpdateRecipientsMsg(std::string username, Direction dir,
-        		std::string chatRoomName, IPaddrStruct* ipAddr1, IPaddrStruct* ipAddr2)
-				: BaseMessage(username, dir, chatRoomName)
-{
+//UpdateRecipientsMsg::UpdateRecipientsMsg(std::string username, Direction dir,
+//        		std::string chatRoomName, IPaddrStruct* ipAddr1, IPaddrStruct* ipAddr2)
+//				: BaseMessage(username, dir, chatRoomName)
+//{
+//	if (m_dir == Direction::P2S){
+//			// "Peers updated."
+//			m_ipAddr1 = nullptr;
+//			m_ipAddr2 = nullptr;
+//		} else if (m_dir == Direction::S2P){
+//			// "Removing peer " + IP address + "."
+//			m_ipAddr1 = m_payloadString.substr(sizeof("Removing peer "),m_payloadString.length()-1);
+//			m_ipAddr2 = nullptr;
+//		} else if (m_dir == Direction::ERROR) {
+//			// "You have been knocked off."
+//			m_ipAddr1 = nullptr;
+//			m_ipAddr2 = nullptr;
+//		} else {
+//			fprintf(stderr, "Invalid direction in creating NotifyDroppedPeerMsg");
+//		}
+//}
+
+UpdateRecipientsMsg::UpdateRecipientsMsg(void* input) : BaseMessage(input){
 	if (m_dir == Direction::P2S){
-		// "Peers updated."
-		m_ipAddr1 = nullptr;
-		m_ipAddr2 = nullptr;
-	} else if (m_dir == Direction::S2P){
-		// "Removing peer " + IP address + "."
-		m_ipAddr1 = m_payloadString.substr(sizeof("Removing peer "),m_payloadString.length()-1);
-		m_ipAddr2 = nullptr;
-	} else if (m_dir == Direction::ERROR) {
-		// "You have been knocked off."
-		m_ipAddr1 = nullptr;
-		m_ipAddr2 = nullptr;
-	} else {
-		fprintf(stderr, "Invalid direction in creating NotifyDroppedPeerMsg");
-	}
+			// "Peers updated."
+			m_ipAddr1 = nullptr;
+			m_ipAddr2 = nullptr;
+		} else if (m_dir == Direction::S2P){
+			// "Removing peer " + IP address + "."
+			m_ipAddr1 = m_payloadString.substr(sizeof("Removing peer "),m_payloadString.length()-1);
+			m_ipAddr2 = nullptr;
+		} else if (m_dir == Direction::ERROR) {
+			// "You have been knocked off."
+			m_ipAddr1 = nullptr;
+			m_ipAddr2 = nullptr;
+		} else {
+			fprintf(stderr, "Invalid direction in creating NotifyDroppedPeerMsg");
+		}
 }
 
 UpdateRecipientsMsg::~UpdateRecipientsMsg() {}

@@ -39,7 +39,7 @@ BaseMessage is the base class and all other classes are derived classes of this 
 
 SERVER
 
-On a single thread, the server listens for messages, and then responds to them in that order.  It has a linked list of chatrooms, each of which have a linked list of peers, and a linked list of floating peers who are not in any chatroom.
+/*Talk about server if necessary*/
 
 
 
@@ -47,7 +47,7 @@ WHAT WE COMPLETED
 
 We implemented all the required work but the difficult part was getting each class to mesh together. All of the logic from our RFC is present and everything theoretically should work, but unfortunately due to the time constraints and the already massive amount of work put in, we were unable to complete the project. Nevertheless, partial credit would be greatly appreciated. 
 
-Everything compiles in Eclipse, and we have implemented everything as far as we can tell. We didn't test the MakeFile even though we made one. 
+Everything compiles in Eclipse. We didn't test the MakeFile even though we made one. 
 
 
 CHANGES FROM THE RFC

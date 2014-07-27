@@ -89,7 +89,7 @@ void Server::respondToRequest(BaseMessage* msg, int cli_sock) {
 	case CHOOSE_P2S:
 		chooseUsername((ChooseUsernameMsg::ChooseUsernameMsg*) msg, cli_sock);
 		break;
-	case UPDATE_P2S:
+	case NOTIFY_P2S:
 		close(cli_sock); // close the connection; open new ones later
 		updateRecipients((NotifyDroppedPeerMsg::NotifyDroppedPeerMsg*) msg,
 				cli_sock);
@@ -198,16 +198,16 @@ void Server::updateRecipients(NotifyDroppedPeerMsg::NotifyDroppedPeerMsg* msg,
 	// for the appropriate chatroom
 	Chatroom* curChatroom = getChatroom(msg->getChatRoomName());
 	// update the peers affected by most recent change
-	IPaddrStruct* ipAddrDropped = msg->getDroppedIpP2S();
+	IPaddrStruct* ipAddrDropped = msg->getDroppedPeerIPaddr();
 	// notify dropped peer
 	int indexRemoved = curChatroom->removePeer(ipAddrDropped);
 	UpdateRecipientStruct* updateRecipientStruct = curChatroom->getUpdateStruct(
 			indexRemoved);
-	UpdateRecipientsMsg firstMsg(Direction::S2P, updateRecipientStruct->firstPeerPrimaryRecipient,
-			updateRecipientStruct->firstPeerSecondaryRecipient);
+	UpdateRecipientsMsg firstMsg(msg->getUsername(), Direction::S2P, msg->getChatRoomName(),
+			updateRecipientStruct->firstPeerSecondaryRecipient, updateRecipientStruct->firstPeerSecondaryRecipient);
 	sendMessage(&firstMsg, updateRecipientStruct->firstPeerToUpdate);
-	UpdateRecipientsMsg firstMsg(Direction::S2P, updateRecipientStruct->secondPeerPrimaryRecipient,
-				updateRecipientStruct->secondPeerSecondaryRecipient);
+	UpdateRecipientsMsg secondMsg(msg->getUsername(), Direction::S2P, msg->getChatRoomName(),
+			updateRecipientStruct->secondPeerPrimaryRecipient,updateRecipientStruct->secondPeerSecondaryRecipient);
 	sendMessage(&firstMsg, updateRecipientStruct->secondPeerToUpdate);
 
 }
@@ -282,7 +282,7 @@ void Server::enterChatroom(EnterChatroomMsg::EnterChatroomMsg* msg,
 	Peer* peerToMove = nullptr;
 	for (std::list<Peer>::iterator it = m_floatingPeers.begin();
 			it != m_floatingPeers.end(); ++it) {
-		if (it->getIPaddr()->sin_addr.s_addr == msg->getIPaddr()->sin_addr.s_addr) {
+		if (it->getIPaddr()->sin_addr.s_addr == getIPaddrStructFromSocket(cli_sock)->sin_addr.s_addr) {
 			peerToMove = it;
 			m_floatingPeers.erase(it);
 		}
