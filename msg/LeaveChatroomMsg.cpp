@@ -41,7 +41,7 @@ LeaveChatroomMsg::LeaveChatroomMsg(void* input) : BaseMessage(input) {
     std::string tempchatRoomPayload(chatRoomPayload);
     if(tempchatRoomPayload.find(m_postfixP2S) > 0){
         m_leaveUserPayload = string(chatRoomPayload);
-        // cut down on string to what we actuall want
+        // cut down on string to what we actually want
         m_leaveUserPayload = m_leaveUserPayload.substr(0, m_username.size());
         // TODO deallocate m_textPayload in destructor
     }

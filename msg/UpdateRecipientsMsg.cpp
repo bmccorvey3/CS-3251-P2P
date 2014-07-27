@@ -7,14 +7,35 @@
 //
 
 #include "UpdateRecipientsMsg.h"
+#include <arpa/inet.h>
 
-/*
-
-UpdateRecipientsMsg::UpdateRecipientsMsg(unsigned int length, char* username,
-                                         unsigned int salt, char* type,
-                                         void* payload) : BaseMessage(length,
-                                                        username,salt,type,
-                                                        payload) {}
+UpdateRecipientsMsg::UpdateRecipientsMsg(std::string username, Direction dir,
+        		std::string chatRoomName, IPaddrStruct* ipAddr1, IPaddrStruct* ipAddr2)
+				: BaseMessage(username, dir, chatRoomName)
+{
+		std::stringstream ss;
+		m_ipAddr1
+//		m_payloadString = ;
+	    if(dir == Direction::P2S) {
+	    	// "Peers updated."
+	    	ss << "Peers updated.";
+	    	m_payloadString = ss.str();
+	        m_messageType = MessageType::UPDATE_P2S;
+	        m_length = HEADER_LENGTH + m_payloadString.length();
+	        m_code = "cups";
+	    }
+	    else if (dir == Direction::S2P) {
+	    	// "New peers: " + updated primary IP address + "," + updated secondary IP address + "."
+	    	ss << "New peers: " << updated primary IP address <<
+	    			"," << updated secondary IP address << ".";
+	        m_messageType = MessageType::UPDATE_S2P;
+	        m_length = HEADER_LENGTH + s2pTotalPayloadSize;
+	        m_code = "cusp";
+	    }
+	    else {
+	        fprintf(stderr, "Incorrect direction in ChooseUsername!\n");
+	    }
+}
 
 UpdateRecipientsMsg::~UpdateRecipientsMsg() {}
 
@@ -73,4 +94,20 @@ std::string UpdateRecipientsMsg::getSecondaryRecipients() {
     return secondary.substr(last+1,first-last-1);
 }
  
- */
+std::string UpdateRecipientsMsg::getIPaddrString(IPaddrStruct* ipAddr){
+	unsigned long actualIP = ntohl(ipAddr->sin_addr.s_addr);
+	std::stringstream ss;
+	ss << int((actualIP&0xFF000000)>>24) << "."
+		<< int((actualIP&0xFF0000)>>16) << "."
+		<< int((actualIP&0xFF00)>>8) << "."
+		<< int(actualIP&0xFF);
+	return ss.str();
+}
+
+std::string UpdateRecipientsMsg::getPortString(IPaddrStruct* ipAddr){
+	unsigned short actualPort = ntohs(ipAddr->sin_port);
+	std::stringstream ss;
+	ss << actualPort;
+	return ss.str();
+}
+
