@@ -5,8 +5,8 @@
 class TestRunnerServer
 {
     public:
-        TestRunner();
-        ~TestRunner();
+		TestRunnerServer();
+        ~TestRunnerServer();
         void run();
         void testPeers();
         void testChatrooms();

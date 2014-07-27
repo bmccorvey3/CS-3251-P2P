@@ -4,6 +4,7 @@
 #ifndef PEER_H
 #define PEER_H
 
+#include <arpa/inet.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
@@ -18,8 +19,14 @@
 #include <sstream>
 #include <iterator>
 #include <iostream>
+#include <queue>
+#include <vector>
+#include <assert.h>
+#include <signal.h>
+#include <alloca.h>
+#include <pthread.h>
 
-#include "sha256.h"
+#include "SHA/sha.h"
 
 #define BUFSIZE 2048
 #define serverPort 11111
@@ -31,7 +38,7 @@
 class Peer
 {
     public:
-        Peer(std::string server);
+        Peer(char *server);
         ~Peer();
 
          typedef struct sockaddr_in IPaddr_struct;
@@ -57,19 +64,24 @@ class Peer
     protected:
     private:
         /*
-        *Vector of messages sent/recieved that are hashed
+        *Vector of messages sent/received that are hashed
         */
         
         std::vector<std::string> m_messageHashes;
         /*
         *Queue that stores any messages unable to be sent to the 2 recipients
         */
-        std::queue<std::string> m_messageList;
+        std::queue<TextMsg> m_messageList;
 
         /*
         *Username used to define peer in chatroom
         */
-        std::string username;
+        std::string m_username;
+
+        /*
+         * My chatroom
+         */
+        std::string m_myChatroom
 
         /*
         *Server that the peers are connecting to,
@@ -80,33 +92,55 @@ class Peer
         /*
         *The two recipients each peer sends text messages to
         */
-        IPAddr primaryRecipient;
-        IPAddr secondaryRecipient;
+        IPaddr primaryRecipient;
+        IPaddr secondaryRecipient;
+
+        static pthread_mutex_t messageMutex; //Access by receivieFromPeers,sendToServer,sendToPeers
+		static pthread_cond_t messagesToSend; //receiveFromPeers adds to Vector
+
+		static pthread_mutex_t hashMutex; //Access by receivefromPeers,sendToServer
+
+		static pthread_mutex_t recipientMutex; //Access by receiveFromServer,sendToPeers
 
         /*
         *Using the SHA256 Hash, any message recieved/sent will be hashed.
         */
-        std::string hashMessage(char *message);
+        std::string hash256Message(TextMsg *message);
+
+        /*
+         * initializes mutexes
+         */
+         void mutexInit();
+
+        /*
+         * Updates Recipients received from server
+         */
+        void updateRecipients(sockaddr_in *one, sockaddr_in *two);
 
         /*
         *Forces lowercase on Strings
         */
-        std::string toLowerCase();
+        std::string toLowerCase(std::string code);
         /*
         *Notifies the server if one of the two recipients of the peer went offline
         *and timed out the ACK response
         */
-        void notifyRecipientDied();
+        void notifyRecipientDied(IPaddr *recipient);
 
         /*
         *Sends a prompt of instructions to stdout
         */
-        void Peer::printPrompt();
+        void printPrompt();
+
+        /*
+         * Creates a socket connecting to the server
+         */
+        int createSocketToServer();
         
         /*
         *Receive messages from previous peers
         */
-        void receieveFromPeer(int portno);
+        void receiveFromPeers(int portno);
 
         /*
         *Receive updates from Server
@@ -116,12 +150,49 @@ class Peer
         /*
         *Send messages to Peer; Linearly:PrimaryRecipient, SecondaryRecipient
         */
-        void sendToPeer();
+        void sendToPeers();
 
         /*
-        *Send UI commands to server
+        *Send UI commands from stdin
         */
-        void sendToServer();
+        void operateUI();
+
+        /*
+         * Enters chatroom 'chatroomName'
+         */
+        void enter(std::string chatroomName);
+
+        /*
+         * Leaves curent chatroom
+        */
+        void leave();
 
 
-}
+        /*
+         * Creates chatroom 'chatroomName'
+         */
+        void create(std::string chatroomName);
+
+
+        /*
+         * destroys chatroom 'chatroomName'
+         */
+        void destroy(std::string message);
+
+        /*
+         * Makes username 'user'
+         */
+        void user(std::string user);
+
+        /*
+         * Lists available chatrooms
+        */
+        void list();
+
+        /*
+         * Adds message to messageQueue
+         */
+        void text(std::string message);
+};
+
+#endif // PEER.H

@@ -26,7 +26,7 @@
 // #define ACTUAL_PATH_INDEX 2 // get past the "./"
 
 
-#include "Chatrooms.h"
+#include "Chatroom.h"
 #define LISTENING_PORT 11111
 
 class Server
@@ -47,7 +47,7 @@ class Server
         /**
         * Dump all data to stdout
         */
-        dump();
+        void dump();
 
         /**
         * Given a client socket, return the IPaddrStruct associated with it.
@@ -78,35 +78,58 @@ class Server
         /**
         * Associate IP address with a username and add to list of floating peers
         */
-        void chooseUsername(ChooseUsernameMsg::ChooseUsernameMsg& msg);
+        void chooseUsername(ChooseUsernameMsg::ChooseUsernameMsg* msg, int cli_sock);
 
         /**
         * If someone drops out, update the affected peers
         * Try to tell peer that dropped out “You have been knocked off.”
         */
-        void updateRecipients(NotifyDroppedPeerMsg::NotifyDroppedPeerMsg& msg);
+        void updateRecipients(NotifyDroppedPeerMsg::NotifyDroppedPeerMsg* msg, int cli_sock);
 
         /**
         * Send back a list of chatrooms
         */
-        void listChatrooms(ListChatroomMsg::ListChatroomMsg& msg);
+        void listChatrooms(ListChatroomMsg::ListChatroomMsg* msg, int cli_sock);
 
         /**
         * Create chatroom unless name is already taken
         */
-        void createChatroom(CreateChatroomMsg::CreateChatroomMsg& msg);
+        void createChatroom(CreateChatroomMsg::CreateChatroomMsg* msg, int cli_sock);
 
         /**
         * Destroy chatroom if empty or else warn that destruction is forbidden.
         */
-        void destroyChatroom(DestroyChatroomMsg::DestroyChatroomMsg& msg));
+        void destroyChatroom(DestroyChatroomMsg::DestroyChatroomMsg* msg, int cli_sock);
 
         /**
         * Remove peer from chatroom list, put in list of floating peers
         */
-        void leaveChatroom(LeaveChatroomMsg::LeaveChatroomMsg& msg);
+        void leaveChatroom(LeaveChatroomMsg::LeaveChatroomMsg* msg, int cli_sock);
 
-        Chatrooom::Chatroom* getChatroom(const std::string& chatroomName)
+        /**
+         * Enter the chatroom
+         */
+        void enterChatroom(EnterChatroomMsg::EnterChatroomMsg* msg, int cli_sock)
+
+        /**
+         * Send a message
+         */
+        void sendMessage(BaseMessage* msg, int cli_sock);
+
+        /**
+		 * Connect to a client, then send the message
+		 */
+		void Server::sendMessage(BaseMessage* msg, IPaddrStruct* ipAddr);
+
+        /**
+         * Parse the chatroom for the given name from the list
+         */
+        Chatroom* getChatroom(const std::string& chatroomName);
+
+        /**
+         * Respond to the request of the client
+         */
+        void respondToRequest(BaseMessage* msg, int cli_sock)
 };
 
 #endif // SERVER_H
