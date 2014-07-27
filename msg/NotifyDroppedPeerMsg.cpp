@@ -46,26 +46,24 @@ NotifyDroppedPeerMsg::NotifyDroppedPeerMsg(std::string username, Direction dir,
 }
 
 NotifyDroppedPeerMsg::NotifyDroppedPeerMsg(void* input) : BaseMessage(input){
-    char* textPayload = (char*) malloc(m_length);
-    memcpy(textPayload, &((char*)input)[HEADER_LENGTH], m_length);
-    std::string tempTextPayload(textPayload);
-    if(tempTextPayload.find(m_prefixStr) == POS_TXT_PREFIX){
-        m_textPayload = std::string(textPayload);
-        // cut down on string to what we actuall want
-        m_textPayload = m_textPayload.substr(POS_TXT_PREFIX+m_prefixStr.size());
-        // TODO deallocate m_textPayload in destructor
-    } else {
-        fprintf(stderr, "Couldn't find 'txt:' in text payload\n");
-        // TODO add log information
-    }
-    // free textPayload; // TODO do I need this?
+	if (m_dir == Direction::P2S){
+			// "Peer " + IP address + ":" portNumber + " dropped."
+		m_droppedPeer = m_payloadString.substr(sizeof(m_prefixS2P));
+	} else if (m_dir == Direction::S2P){
+		// "Removing peer " + IP address + "."
+		m_droppedPeer = m_payloadString.substr(sizeof(m_prefixS2P));
+	} else if (m_dir == Direction::ERROR) {
+		// "You have been knocked off."
+		m_droppedPeer = "";
+	} else {
+		fprintf(stderr, "Invalid direction in creating NotifyDroppedPeerMsg");
+	}
 }
 
 NotifyDroppedPeerMsg::~NotifyDroppedPeerMsg() {}
 
-IPaddrStruct* getDroppedPeerIPaddr(){
-
-	return nullptr;
+IPaddrStruct* NotifyDroppedPeerMsg::getDroppedPeerIPaddr(){
+	return getIPaddrFromStr(m_droppedPeer);
 }
 
 std::string NotifyDroppedPeerMsg::getIPaddrString(IPaddrStruct* ipAddr){
@@ -85,14 +83,16 @@ std::string NotifyDroppedPeerMsg::getPortString(IPaddrStruct* ipAddr){
 	return ss.str();
 }
 
-IPaddrStruct* getIPaddrFromStr(std::string inputIp){
+IPaddrStruct* NotifyDroppedPeerMsg::getIPaddrFromStr(std::string inputIp){
 	int posOfColon = inputIp.find(":");
 	std::string actualIPstr = inputIp.substr(0,posOfColon-1);
-	std::string actualPort = inputIp.substr(posOfColon+1);
 	IPaddrStruct* ipAddr = malloc(sizeof(IPaddr));
 	memset(ipAddr, 0 ,sizeof(ipAddr));
 	inet_pton(AF_INET, inputIp.c_str(), &(ipAddr->sin_addr));
 	ipAddr->sin_family = AF_INET;
-	ipAddr->sin_port = atoi(actualPort.c_str());
+	if (inputIp.length() > posOfColon && posOfColon != std::string::npos){
+		std::string actualPort = inputIp.substr(posOfColon+1);
+			ipAddr->sin_port = atoi(actualPort.c_str());
+	}
 	return ipAddr;
 }

@@ -42,7 +42,8 @@ public :
     
     static std::string getIPaddrString(IPaddrStruct* ipAddr);
     static std::string getPortString(IPaddrStruct* ipAddr);
-
+    IPaddrStruct* getDroppedPeerIPaddr();
+    IPaddrStruct* getIPaddrFromStr(std::string inputIp)
 private:
     string m_notifyPayload;
     const static std::string m_prefixP2S;

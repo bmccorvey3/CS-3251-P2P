@@ -131,14 +131,12 @@ void Peer::receiveFromServer(){
   	  //UpdateRecipients Message
   	  if(type == UPDATE_S2P){
     		UpdateRecipientsMsg *update = UpdateRecipientsMsg::getInstance(buffer);
-    		string newPrimary = update->getPrimaryRecipients();
-    		string newSecondary = update->getSecondaryRecipients();
 
     		sockaddr_in *new1 =update->getIPaddr1();
     		sockaddr_in *new2 =update->getIPaddr2();
 
     		updateRecipients(new1, new2);
-    		cout << newPrimary << newSecondary;
+    		cout << update->getPayloadString() << std::endl;
 
     		response = (void*) msg->getMessageStruct();
     		while(send(svr_sock, response, BUFSIZE,0));
