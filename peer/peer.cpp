@@ -94,7 +94,7 @@ void Peer::receiveFromPeers(int portno){
   	  pthread_cond_broadcast(&messagesToSend);
   	  pthread_mutex_unlock(&messageMutex);
   	  //Message displayed to stdout
-  	cout << msg->getTextPayload();
+  	cout << msg->getTextPayload()<<std::endl;
   }
   close(this_sock);
   close(sender_sock);
@@ -131,14 +131,12 @@ void Peer::receiveFromServer(){
   	  //UpdateRecipients Message
   	  if(type == UPDATE_S2P){
     		UpdateRecipientsMsg *update = UpdateRecipientsMsg::getInstance(buffer);
-    		string newPrimary = update->getPrimaryRecipients();
-    		string newSecondary = update->getSecondaryRecipients();
 
     		sockaddr_in *new1 =update->getIPaddr1();
     		sockaddr_in *new2 =update->getIPaddr2();
 
     		updateRecipients(new1, new2);
-    		cout << newPrimary << newSecondary;
+    		cout << update->getPayloadString()<<endl;
 
     		response = (void*) msg->getMessageStruct();
     		while(send(svr_sock, response, BUFSIZE,0));
@@ -146,11 +144,11 @@ void Peer::receiveFromServer(){
   	//Peer Dropped Message
     	if(type == NOTIFY_S2P){
     		NotifyDroppedPeerMsg *update = NotifyDroppedPeerMsg::getInstance(buffer);
-    		cout << update->getPayloadString();
+    		cout << update->getPayloadString()<<endl;
     	}
     	else{
     	//Server sent a message not to update or drop peer
-    		cout << "Received invalid server message";
+    		cout << "Received invalid server message"<<endl;
     	}
   }
 	close(this_sock);
@@ -291,7 +289,7 @@ void Peer::enter(std::string message){
 	while(numBytesReceived += recv(sock, response+numBytesReceived, BUFSIZE, 0)){};
 
 	EnterChatroomMsg chat = response;
-	std::cout << chat.getPayloadString();
+	std::cout << chat.getPayloadString()<<std::endl;
 	close(sock);
  	m_myChatroom = message;
 }
@@ -313,7 +311,7 @@ void Peer::leave(){
 	while(numBytesReceived += recv(sock, response+numBytesReceived, BUFSIZE, 0)){};
 
 	LeaveChatroomMsg left = response;
-	std::cout << left.getPayloadString();
+	std::cout << left.getPayloadString()<<std::endl;
 	close(sock);
  	m_myChatroom = NULL;
 }
@@ -335,7 +333,7 @@ void Peer::create(std::string chatroomName){
 	while(numBytesReceived += recv(sock, response+numBytesReceived, BUFSIZE, 0)){};
 
 	CreateChatroomMsg created = response;
-	std::cout << created.getPayloadString();
+	std::cout << created.getPayloadString()<<std::endl;
 	close(sock);
 }
 
@@ -356,7 +354,7 @@ void Peer::destroy(std::string chatroomName){
 	while(numBytesReceived += recv(sock, response+numBytesReceived, BUFSIZE, 0)){};
 
 	DestroyChatroomMsg destroyed = response;
-	std::cout << destroyed.getPayloadString();
+	std::cout << destroyed.getPayloadString()<<std::endl;
 	close(sock);
 }
 
@@ -377,7 +375,7 @@ void Peer::user(std::string message){
 	while(numBytesReceived += recv(sock, response+numBytesReceived, BUFSIZE, 0)){};
 
 	ChooseUsernameMsg user = response;
-	std::cout <<user.getPayloadString();
+	std::cout <<user.getPayloadString()<<std::endl;
 	m_username = user.getUsername();
 	close(sock);
 }
@@ -399,7 +397,7 @@ void Peer::list(){
 	while(numBytesReceived += recv(sock, response+numBytesReceived, BUFSIZE, 0)){};
 
 	ListChatroomMsg list = response;
-	std::cout << list.getPayloadString();
+	std::cout << list.getPayloadString()<<std::endl;
 	close(sock);
 }
 
@@ -472,11 +470,13 @@ void Peer::operateUI(){
 		printPrompt();
 	}
 	else{
-		std::cout << "Invalid UI command, press h to see available commands";
+		std::cout << "Invalid UI command, press h to see available commands"<<std::endl;
 	}
 }
 
 void Peer::updateRecipients(sockaddr_in *one, sockaddr_in *two){
+	//Takes in two sockaddr_in from the updateRecipientsMsg from the server
+	//Takes their sin_addr and saves them to the primary and secondary recipients
 	pthread_mutex_lock(&recipientMutex);
 	primaryRecipient = one->sin_addr;
 	secondaryRecipient = two->sin_addr;
@@ -484,6 +484,7 @@ void Peer::updateRecipients(sockaddr_in *one, sockaddr_in *two){
 }
 
 void Peer::printPrompt(){
+	//Initial instructions for peer
  std::cout <<"Press h for help"
  <<"Available Commands:" <<std::endl
  <<"Text: Writes Text to others in Chatroom" <<std::endl
@@ -492,10 +493,11 @@ void Peer::printPrompt(){
  <<"Create: 'Chatroom': Creates chatroom of specified name" <<std::endl
  <<"Destroy: 'Chatroom': Destroys chatroom of specified name" <<std::endl
  <<"List: Lists available chatrooms to join" <<std::endl
- <<"User: 'username': Creates username specified (Required before chatting)";
+ <<"User: 'username': Creates username specified (Required before chatting)"<<std::endl;
 }
 
 std::string Peer::toLowerCase(std::string message){
+	//Lowercases any string ex:UI commands
 	std::string code ="";
 	int i = 0;
 	char c;
@@ -508,6 +510,7 @@ std::string Peer::toLowerCase(std::string message){
 }
 
 std::string Peer::hash256Message(TextMsg *message){
+	//SHA256 hash compression
 	unsigned char *output;
 	const unsigned char *msg = message->getPayloadString();
 	//SHA256().CalculateDigest(pbOutputBuffer, pbData, nDataLen);
